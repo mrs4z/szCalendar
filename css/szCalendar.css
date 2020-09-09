@@ -1,0 +1,98 @@
+.szCalendar {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.szCalendar__body {
+  display: flex;
+  flex-direction: row;
+  margin: -10px;
+}
+.szCalendar__body-item {
+  margin: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.szCalendar__body-item-menu {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin: -10px;
+  padding-bottom: 15px;
+}
+.szCalendar__body-item-menu-button {
+  flex-grow: 1;
+  text-align: center;
+  padding: 10px;
+  background: #E9E9E9;
+  border-radius: 5px;
+  font-weight: bold;
+  margin: 10px;
+  cursor: pointer;
+}
+.szCalendar__body-item-menu-button:hover {
+  background: #dedede;
+}
+.szCalendar__header {
+  width: 100%;
+  height: 50px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+.szCalendar__header-title {
+  margin-left: 10px;
+  margin-right: 10px;
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  background: #E9E9E9;
+  font-weight: bold;
+}
+.szCalendar__header-mini {
+  padding: 10px;
+  background: #E9E9E9;
+  cursor: pointer;
+}
+.szCalendar__header-mini:hover {
+  background: #dedede;
+}
+
+.debug {
+  display: inline-flex;
+}
+
+table.szCalendar__table {
+  box-sizing: border-box;
+  border-collapse: collapse;
+}
+table.szCalendar__table td {
+  padding: 10px;
+  cursor: pointer;
+  text-align: center;
+}
+table.szCalendar__table td:hover {
+  background: #E9E9E9;
+}
+
+.szCalendar-no-active {
+  color: #BDBDBD;
+}
+
+.szCalendar-today {
+  color: #FF4C4C;
+  border-bottom: 1px solid #FF4C4C;
+}
+
+.szCalendar-selected {
+  background: #ff6738;
+  color: #fff;
+}
+.szCalendar-selected:hover {
+  background: #ff3400 !important;
+}
+
+/*# sourceMappingURL=szCalendar.css.map */

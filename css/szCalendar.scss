@@ -1,0 +1,119 @@
+$colorPred: #ff6738;
+$colorPredHover: #ff3400;
+$hoverBackground: #E9E9E9;
+$hoverBackgroundDark: #dedede;
+
+$toDay: #FF4C4C;
+
+$noActiveDays: #BDBDBD;
+
+.szCalendar {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  &__body {
+    display: flex;
+    flex-direction: row;
+    margin: -10px;
+
+    &-item {
+      margin: 10px;
+      display: flex;
+      flex-direction: column;
+
+      &-menu {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        margin: -10px;
+        padding-bottom: 15px;
+
+        &-button {
+          flex-grow: 1;
+          text-align: center;
+          padding: 10px;
+          background: $hoverBackground;
+          border-radius: 5px;
+          font-weight: bold;
+          margin: 10px;
+          cursor: pointer;
+
+          &:hover {
+            background: $hoverBackgroundDark;
+          }
+        }
+      }
+    }
+  }
+
+  &__header {
+    width: 100%;
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+
+    &-title {
+      margin-left: 10px;
+      margin-right: 10px;
+      width: 100%;
+      text-align: center;
+      padding: 10px;
+      background: $hoverBackground;
+      font-weight: bold;
+    }
+
+
+    &-mini {
+      padding: 10px;
+      background: $hoverBackground;
+      cursor: pointer;
+
+      &:hover {
+        background: $hoverBackgroundDark;
+      }
+    }
+  }
+}
+
+.debug {
+  display: inline-flex;
+}
+
+table.szCalendar__table {
+  box-sizing: border-box;
+  border-collapse: collapse;
+
+  td {
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+
+    &:hover {
+      background: $hoverBackground;
+    }
+  }
+}
+
+.szCalendar-no-active {
+  color: $noActiveDays;
+}
+
+.szCalendar-today {
+  color: $toDay;
+  border-bottom: 1px solid $toDay;
+}
+
+.szCalendar-selected {
+  background: $colorPred;
+  color: #fff;
+
+  &:hover {
+    background: $colorPredHover !important;
+  }
+}
