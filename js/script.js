@@ -1,6 +1,7 @@
 $(document).ready(function() {
     $('#calendar').szCalendar({
-        method: 'solo',
+        method: 'multi',
+        calendarsCount: 2
 
     })
 

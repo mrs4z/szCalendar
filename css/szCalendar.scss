@@ -1,23 +1,93 @@
 $colorPred: #ff6738;
 $colorPredHover: #ff3400;
+$colorPredRangeSelected: #ffcead;
 $hoverBackground: #E9E9E9;
 $hoverBackgroundDark: #dedede;
+$borderCalendarColor: #f8f8f8;
 
+
+$colorLink: #ff815c;
+$textGray: #7a7a7a;
 $toDay: #FF4C4C;
 
 $noActiveDays: #BDBDBD;
 
 .szCalendar {
   width: 100%;
+  border-radius: 5px;
+  border: 1px solid $borderCalendarColor;
+  -webkit-box-shadow: 0px 0px 17px -2px rgba(0,0,0,0.23);
+  -moz-box-shadow: 0px 0px 17px -2px rgba(0,0,0,0.23);
+  box-shadow: 0px 0px 17px -2px rgba(0,0,0,0.23);
 
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 
+  &__multi {
+    display: flex;
+    flex-direction: row;
+
+    &-setup {
+      width: 180px;
+      border-right: 1px solid $hoverBackground;
+      padding: 20px;
+
+      display: flex;
+      flex-direction: column;
+
+      a {
+        color: $colorLink;
+        text-decoration: none;
+        margin-bottom: 15px;
+        font-size: 11pt;
+
+        &:last-child {
+          margin-bottom: 0px !important;
+        }
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
+
+    &-form-inputs {
+      padding: 15px;
+      border-bottom: 1px solid $hoverBackground;
+
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-right: -10px;
+
+      div {
+        margin-right: 10px;
+      }
+
+      &-title {
+        color: $textGray;
+        font-size: 11pt;
+      }
+
+      input {
+        max-width: 100px;
+        border: 1px solid $hoverBackgroundDark;
+        border-radius: 5px;
+        font-size: 12pt;
+        padding: 5px;
+      }
+    }
+
+  }
+
+
+
   &__body {
     display: flex;
     flex-direction: row;
+    padding: 10px;
     margin: -10px;
 
     &-item {
@@ -35,12 +105,13 @@ $noActiveDays: #BDBDBD;
         &-button {
           flex-grow: 1;
           text-align: center;
-          padding: 10px;
+          padding: 5px;
           background: $hoverBackground;
           border-radius: 5px;
           font-weight: bold;
           margin: 10px;
           cursor: pointer;
+          font-size: 10pt;
 
           &:hover {
             background: $hoverBackgroundDark;
@@ -89,10 +160,15 @@ table.szCalendar__table {
   box-sizing: border-box;
   border-collapse: collapse;
 
+  th {
+    font-size: 10pt;
+  }
+
   td {
     padding: 10px;
     cursor: pointer;
     text-align: center;
+    font-size: 10pt;
 
     &:hover {
       background: $hoverBackground;
@@ -107,6 +183,10 @@ table.szCalendar__table {
 .szCalendar-today {
   color: $toDay;
   border-bottom: 1px solid $toDay;
+}
+
+.szCalendar-interval-selected {
+  background: $colorPredRangeSelected;
 }
 
 .szCalendar-selected {

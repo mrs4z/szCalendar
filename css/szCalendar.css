@@ -1,13 +1,64 @@
 .szCalendar {
   width: 100%;
+  border-radius: 5px;
+  border: 1px solid #f8f8f8;
+  -webkit-box-shadow: 0px 0px 17px -2px rgba(0, 0, 0, 0.23);
+  -moz-box-shadow: 0px 0px 17px -2px rgba(0, 0, 0, 0.23);
+  box-shadow: 0px 0px 17px -2px rgba(0, 0, 0, 0.23);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
 }
+.szCalendar__multi {
+  display: flex;
+  flex-direction: row;
+}
+.szCalendar__multi-setup {
+  width: 180px;
+  border-right: 1px solid #E9E9E9;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.szCalendar__multi-setup a {
+  color: #ff815c;
+  text-decoration: none;
+  margin-bottom: 15px;
+  font-size: 11pt;
+}
+.szCalendar__multi-setup a:last-child {
+  margin-bottom: 0px !important;
+}
+.szCalendar__multi-setup a:hover {
+  text-decoration: underline;
+}
+.szCalendar__multi-form-inputs {
+  padding: 15px;
+  border-bottom: 1px solid #E9E9E9;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-right: -10px;
+}
+.szCalendar__multi-form-inputs div {
+  margin-right: 10px;
+}
+.szCalendar__multi-form-inputs-title {
+  color: #7a7a7a;
+  font-size: 11pt;
+}
+.szCalendar__multi-form-inputs input {
+  max-width: 100px;
+  border: 1px solid #dedede;
+  border-radius: 5px;
+  font-size: 12pt;
+  padding: 5px;
+}
 .szCalendar__body {
   display: flex;
   flex-direction: row;
+  padding: 10px;
   margin: -10px;
 }
 .szCalendar__body-item {
@@ -25,12 +76,13 @@
 .szCalendar__body-item-menu-button {
   flex-grow: 1;
   text-align: center;
-  padding: 10px;
+  padding: 5px;
   background: #E9E9E9;
   border-radius: 5px;
   font-weight: bold;
   margin: 10px;
   cursor: pointer;
+  font-size: 10pt;
 }
 .szCalendar__body-item-menu-button:hover {
   background: #dedede;
@@ -69,10 +121,14 @@ table.szCalendar__table {
   box-sizing: border-box;
   border-collapse: collapse;
 }
+table.szCalendar__table th {
+  font-size: 10pt;
+}
 table.szCalendar__table td {
   padding: 10px;
   cursor: pointer;
   text-align: center;
+  font-size: 10pt;
 }
 table.szCalendar__table td:hover {
   background: #E9E9E9;
@@ -85,6 +141,10 @@ table.szCalendar__table td:hover {
 .szCalendar-today {
   color: #FF4C4C;
   border-bottom: 1px solid #FF4C4C;
+}
+
+.szCalendar-interval-selected {
+  background: #ffcead;
 }
 
 .szCalendar-selected {
