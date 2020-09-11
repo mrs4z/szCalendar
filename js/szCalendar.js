@@ -40,6 +40,7 @@
         },
         multi: function() {
             let selectedDateMulti = {
+                firstSettings: false,
                 dom: {
                     start: null,
                     end: null
@@ -262,7 +263,7 @@
                     },
                     formatterDate: function(year, month, date) {
                         return `${year}-${month}-${date}`
-                    }
+                    },
                 }
             }
         }
@@ -285,8 +286,22 @@
                 calendarsCount: 2,
                 startDate: {
                     year: new Date().getFullYear(),
-                    month: 11,
+                    month: new Date().getMonth() + 1,
                     day: null
+                },
+                // for multi
+                params: {
+                    multi: {
+                        start: {
+                            year: new Date().getFullYear(),
+                            month: new Date().getMonth() + 1,
+                            day: new Date().getDate()
+                        }, end: {
+                            year: new Date().getFullYear(),
+                            month: new Date().getMonth() + 1,
+                            day: new Date().getDate()
+                        }
+                    }
                 }
             }, options)
 
@@ -388,15 +403,27 @@
              * events for multi
              */
             if(settings.method == 'multi') {
+
+                // first settings
+                selectedDate.firstSettings = true
+
+                // on load default params
+                selectedDate.set.setFullDate(settings.params.multi.start.year, settings.params.multi.start.month - 1, settings.params.multi.start.day, 'start')
+                selectedDate.set.setFullDate(settings.params.multi.end.year, settings.params.multi.end.month - 1, settings.params.multi.end.day, 'end')
+
+                // update values inputs by settings
+                $tableTemplate.find('[calendar-object="multi-start-date"]').val(selectedDate.getSelectedDate().date.start.full)
+                $tableTemplate.find('[calendar-object="multi-end-date"]').val(selectedDate.getSelectedDate().date.end.full)
+
                 $tableTemplate.find('[calendar-object="multi-start-date"]').on('change', function() {
-                    updateByType($(this).val(), 'start')
+                    updateByType($(this).val(), 'start', 1)
 
                     // update real data
                     $(this).val(selectedDate.getSelectedDate().date.start.full)
                 })
 
                 $tableTemplate.find('[calendar-object="multi-end-date"]').on('change', function() {
-                    updateByType($(this).val(), 'end')
+                    updateByType($(this).val(), 'end', 1)
 
                     // update real data
                     $(this).val(selectedDate.getSelectedDate().date.end.full)
@@ -416,11 +443,24 @@
                     $tableTemplate.find('[calendar-object="multi-end-date"]').val(getParamsOfData.end)
                 })
 
-                function updateByType(value, type) {
+                function updateByType(value, type, updateType = 0) {
                     selectedDate.clearSelectorItem(type, $tableTemplate)
 
                     // parse value
                     let parseValue = value.split("-")
+
+                    if(updateType != 0) {
+                        let resultParseDate = type == "end" ? "start" : "end"
+                        let parseValueReverse = $tableTemplate.find(`[calendar-object="multi-${resultParseDate}-date"]`).val().split('-')
+
+                        let getCompare = type == "end" ? (parseInt(parseValue[0]) <= parseInt(parseValueReverse[0])) && (parseInt(parseValue[1]) <= parseInt(parseValueReverse[1])) && (parseInt(parseValue[2]) <= parseInt(parseValueReverse[2]))
+                            : (parseInt(parseValue[0]) >= parseInt(parseValueReverse[0])) && (parseInt(parseValue[1]) >= parseInt(parseValueReverse[1])) && (parseInt(parseValue[2]) >= parseInt(parseValueReverse[2]))
+
+                        if (getCompare) {
+                            parseValue = parseValueReverse
+                        }
+                    }
+
                     selectedDate.set.setFullDate(parseInt(parseValue[0]), parseInt(parseValue[1]) - 1, parseInt(parseValue[2]), type)
                     selectedDate.set.setDom($tableTemplate.find(`[data-object="${selectedDate.getSelectedDate()['date'][type]['year']}-${selectedDate.getSelectedDate()['date'][type]['month'] - 1}-${selectedDate.getSelectedDate()['date'][type]['day']}"]`), type)
 
@@ -504,21 +544,24 @@
              * @returns {boolean}
              */
             function updateMultiSelect() {
-                if(selectedDate.getSelectedDate().dom.start == null && selectedDate.getSelectedDate().dom.end == null) {
-                    selectedDate.clearSelector($tableTemplate)
-                    return false;
-                }
-
                 /**
                  * for multi
                  */
                 // check selectors date
+                if(!selectedDate.firstSettings) {
+                    if ((selectedDate.getSelectedDate().dom.start == null) && (selectedDate.getSelectedDate().dom.end == null)) {
+                        selectedDate.clearSelector($tableTemplate)
+                        return false;
+                    }
+                }
 
-                if(selectedDate.getSelectedDate().dom.start != null)
+                if(selectedDate.getSelectedDate().dom.start != null || selectedDate.firstSettings)
                     $tableTemplate.find(`[data-object="${selectedDate.getSelectedDate().date.start.year}-${selectedDate.getSelectedDate().date.start.month}-${selectedDate.getSelectedDate().date.start.day}"]`).addClass('szCalendar-selected')
 
-                if(selectedDate.getSelectedDate().dom.end != null)
+                if(selectedDate.getSelectedDate().dom.end != null || selectedDate.firstSettings)
                     $tableTemplate.find(`[data-object="${selectedDate.getSelectedDate().date.end.year}-${selectedDate.getSelectedDate().date.end.month}-${selectedDate.getSelectedDate().date.end.day}"]`).addClass('szCalendar-selected')
+
+                selectedDate.firstSettings = true
 
                 selectedDate.set.setStartDom($tableTemplate.find(`[data-object="${selectedDate.getSelectedDate().date.start.year}-${selectedDate.getSelectedDate().date.start.month}-${selectedDate.getSelectedDate().date.start.day}"]`))
                 selectedDate.set.setEndDom($tableTemplate.find(`[data-object="${selectedDate.getSelectedDate().date.end.year}-${selectedDate.getSelectedDate().date.end.month}-${selectedDate.getSelectedDate().date.end.day}"]`))
@@ -538,19 +581,27 @@
 
                 // get year
                 for(let formYear = getStartDate.year; formYear <= getHoverDate.year; formYear++) {
+                    console.log(`year -> ${getStartDate.year} / new year -> ${formYear}`)
                     let startMonth = getStartDate.month
+                    let getEndMonth = getHoverDate.month
 
-                    // check form
-                    if(getStartDate.year < getHoverDate.year) {
-                        startMonth = 0
+                    if(startMonth == 11) {
+                        getEndMonth = 11
                     }
 
-                    // get month
-                    for(let formMonth = startMonth; formMonth <= getHoverDate.month; formMonth++) {
-                        let startDay = getStartDate.day
+                    // check form
+                    if(getStartDate.year != formYear) {
+                        startMonth = 0
+                        getEndMonth = getHoverDate.month
+                    }
+
+                    for(let formMonth = startMonth; formMonth <= getEndMonth; formMonth++) {
+                        let startDay = startMonth == 0 ? 0 : getStartDate.day
                         let endDay = getHoverDate.day
 
-                        if (getStartDate.month < getHoverDate.month) {
+                        console.log(`ДОЛЖНО БЫТЬ 2 РАЗА ->`, formYear)
+
+                        if (startMonth < getHoverDate.month) {
                             if(formMonth != getStartDate.month && formMonth != getHoverDate.month) {
                                 startDay = 0
                                 endDay = 32
@@ -561,7 +612,12 @@
                                 startDay = getStartDate.day
                                 endDay = 32
                             }
+                        } else {
+                            if(formMonth == 11) {
+                                endDay = 32
+                            }
                         }
+
                         // get day
                         for(let formDay = startDay; formDay < endDay; formDay++) {
                             $tableTemplate.find(`[data-object="${formYear}-${formMonth}-${formDay}"]`).addClass('szCalendar-interval-selected')
@@ -654,17 +710,24 @@
                                     // get year
                                     for(let formYear = getStartDate.year; formYear <= getHoverDate.year; formYear++) {
                                         let startMonth = getStartDate.month
+                                        let getEndMonth = getHoverDate.month
 
-                                        // check form
-                                        if(getStartDate.year < getHoverDate.year) {
-                                            startMonth = 0
+                                        if(startMonth == 11) {
+                                            getEndMonth = 11
                                         }
 
-                                        for(let formMonth = startMonth; formMonth <= getHoverDate.month; formMonth++) {
-                                            let startDay = getStartDate.day
+                                        // check form
+                                        if(getStartDate.year != formYear) {
+                                            startMonth = 0
+                                            getEndMonth = getHoverDate.month
+                                        }
+
+
+                                        for(let formMonth = startMonth; formMonth <= getEndMonth; formMonth++) {
+                                            let startDay = startMonth == 0 ? 0 : getStartDate.day
                                             let endDay = getHoverDate.day
 
-                                            if (getStartDate.month < getHoverDate.month) {
+                                            if (startMonth < getHoverDate.month) {
                                                 if(formMonth != getStartDate.month && formMonth != getHoverDate.month) {
                                                     startDay = 0
                                                     endDay = 32
@@ -676,8 +739,8 @@
                                                     endDay = 32
                                                 }
                                             } else {
-                                                if(getStartDate.year < getHoverDate.year) {
-                                                    startDay = 0
+                                                if(formMonth == 11) {
+                                                    endDay = 32
                                                 }
                                             }
 
@@ -728,9 +791,13 @@
                             if(selectedDate.isSelected()) {
                                 selectedDate.setStateSelected(false)
 
-                                selectedDate.set.setEndDom($(this))
-                                selectedDate.set.setFullDate(newYear, month, saveDate, 'end')
-
+                                if((newYear <= selectedDate.getSelectedDate().date.start.year) && (month <= selectedDate.getSelectedDate().date.start.month) && (saveDate <= selectedDate.getSelectedDate().date.start.day)) {
+                                    selectedDate.set.setEndDom(selectedDate.getSelectedDate().dom.start)
+                                    selectedDate.set.setFullDate(selectedDate.getSelectedDate().date.start.year, selectedDate.getSelectedDate().date.start.month, selectedDate.getSelectedDate().date.start.day, 'end')
+                                } else {
+                                    selectedDate.set.setEndDom($(this))
+                                    selectedDate.set.setFullDate(newYear, month, saveDate, 'end')
+                                }
                                 selectedDate.getSelectedDate().dom.end.addClass('szCalendar-selected')
 
                                 // update date in input
