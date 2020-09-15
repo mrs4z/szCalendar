@@ -283,6 +283,7 @@
             // default settings
             var settings = $.extend({
                 method: 'solo',
+                setup: true,
                 calendarsCount: 2,
                 startDate: {
                     year: new Date().getFullYear(),
@@ -292,6 +293,7 @@
                 // for multi
                 params: {
                     multi: {
+                        editable: true,
                         start: {
                             year: new Date().getFullYear(),
                             month: new Date().getMonth() + 1,
@@ -323,28 +325,34 @@
             // selected date
             let selectedDate = settings.method == 'solo' ? soloCreate : multiCreate
 
+            let $templateSetup = ``
+
+            if(settings.setup) {
+                $templateSetup = `<div class="szCalendar__multi-setup">
+                                        <a>За все время</a>
+                                        <a calendar-object="setup" calendar-setup-type="toDay">Сегодня</a>
+                                        <a calendar-object="setup" calendar-setup-type="yestDay">Вчера</a>
+                                        <a calendar-object="setup" calendar-setup-type="lastSevenDay">За последние 7 дней</a>
+                                        <a calendar-object="setup" calendar-setup-type="onThisWeek">На этой неделе</a>
+                                        <a calendar-object="setup" calendar-setup-type="onPastWeek">Прошлая неделя</a>
+                                        <a calendar-object="setup" calendar-setup-type="onThisMonth">В этом месяце</a>
+                                        <a calendar-object="setup" calendar-setup-type="onPastMonth">Прошлый месяц</a>
+                                        <a calendar-object="setup" calendar-setup-type="onThisYear">За текущий год</a>
+                                    </div>`
+            }
+
             // create table
             let $tableTemplate = $(`
                 <div class="debug">
                     <div class="szCalendar">
                         <div class="szCalendar__multi">
-                            <div class="szCalendar__multi-setup">
-                                <a>За все время</a>
-                                <a calendar-object="setup" calendar-setup-type="toDay">Сегодня</a>
-                                <a calendar-object="setup" calendar-setup-type="yestDay">Вчера</a>
-                                <a calendar-object="setup" calendar-setup-type="lastSevenDay">За последние 7 дней</a>
-                                <a calendar-object="setup" calendar-setup-type="onThisWeek">На этой неделе</a>
-                                <a calendar-object="setup" calendar-setup-type="onPastWeek">Прошлая неделя</a>
-                                <a calendar-object="setup" calendar-setup-type="onThisMonth">В этом месяце</a>
-                                <a calendar-object="setup" calendar-setup-type="onPastMonth">Прошлый месяц</a>
-                                <a calendar-object="setup" calendar-setup-type="onThisYear">За текущий год</a>
-                            </div>
+                            ${$templateSetup}
                             <div class="szCalendar__multi-form">
                                 <div class="szCalendar__multi-form-inputs">
                                     <div class="szCalendar__multi-form-inputs-title">Диапазон:</div>
-                                    <div><input type="text" calendar-object="multi-start-date"></div>
+                                    <div><input type="text" calendar-object="multi-start-date" ${settings.params.multi.editable ? '' : 'disabled'}></div>
                                     <div>&mdash;</div>
-                                    <div><input type="text" calendar-object="multi-end-date"></div>
+                                    <div><input type="text" calendar-object="multi-end-date" ${settings.params.multi.editable ? '' : 'disabled'}></div>
                                 </div>
                                 <div class="szCalendar__body">
                                     <div class="szCalendar__body-item">
@@ -699,7 +707,7 @@
                                      * в таком случае, мы должны создать массив, при том, что в месяце - 28-31 день, а после циклить по датам и выводить
                                      */
 
-                                    // TODO: получать количество дней в месяце
+                                        // TODO: получать количество дней в месяце
                                     let maxDays = 31
 
                                     let parseDate = $(this).attr('data-object').split('-')
@@ -755,71 +763,73 @@
                         })
                     }
 
-                    $createItem.click(function() {
-                        /**
-                         * solo method selector event
-                         */
-                        if(settings.method == 'solo') {
-                            if (selectedDate.getSelectedDate().dom != null) {
-                                selectedDate.getSelectedDate().dom.removeClass('szCalendar-selected')
-                            }
-
-                            // update selected date object
-                            selectedDate.setSelectedDate({
-                                dom: $(this),
-                                date: {
-                                    year: newYear,
-                                    month: month,
-                                    day: saveDate
-                                }
-                            })
-
-                            // add class
-                            selectedDate.getSelectedDate().dom.addClass('szCalendar-selected')
-
-                            // for debug change
-                            $tableTemplate.find('[debug-object="selected-date"]').html(new Date(selectedDate.getSelectedDate().date.timestamp).getFullYear())
-                            $tableTemplate.find('[debug-object="selected-date-timestamp"]').html(selectedDate.getSelectedDate().date.timestamp)
-                        } else {
-                            if(!selectedDate.isSelected()) {
-                                selectedDate.clearSelector($tableTemplate)
-                            }
-
+                    if (settings.params.multi.editable) {
+                        $createItem.click(function () {
                             /**
-                             * multi method selector event
+                             * solo method selector event
                              */
-                            if(selectedDate.isSelected()) {
-                                selectedDate.setStateSelected(false)
-
-                                if((newYear <= selectedDate.getSelectedDate().date.start.year) && (month <= selectedDate.getSelectedDate().date.start.month) && (saveDate <= selectedDate.getSelectedDate().date.start.day)) {
-                                    selectedDate.set.setEndDom(selectedDate.getSelectedDate().dom.start)
-                                    selectedDate.set.setFullDate(selectedDate.getSelectedDate().date.start.year, selectedDate.getSelectedDate().date.start.month, selectedDate.getSelectedDate().date.start.day, 'end')
-                                } else {
-                                    selectedDate.set.setEndDom($(this))
-                                    selectedDate.set.setFullDate(newYear, month, saveDate, 'end')
+                            if (settings.method == 'solo') {
+                                if (selectedDate.getSelectedDate().dom != null) {
+                                    selectedDate.getSelectedDate().dom.removeClass('szCalendar-selected')
                                 }
-                                selectedDate.getSelectedDate().dom.end.addClass('szCalendar-selected')
 
-                                // update date in input
-                                $tableTemplate.find('[calendar-object="multi-end-date"]').val(selectedDate.getSelectedDate().date.end.full)
-                                $tableTemplate.find('[calendar-object="multi-end-date"]').focus()
+                                // update selected date object
+                                selectedDate.setSelectedDate({
+                                    dom: $(this),
+                                    date: {
+                                        year: newYear,
+                                        month: month,
+                                        day: saveDate
+                                    }
+                                })
 
+                                // add class
+                                selectedDate.getSelectedDate().dom.addClass('szCalendar-selected')
+
+                                // for debug change
+                                $tableTemplate.find('[debug-object="selected-date"]').html(new Date(selectedDate.getSelectedDate().date.timestamp).getFullYear())
+                                $tableTemplate.find('[debug-object="selected-date-timestamp"]').html(selectedDate.getSelectedDate().date.timestamp)
                             } else {
-                                // set active state
-                                $tableTemplate.find('[calendar-object="multi-start-date"]').focus()
+                                if (!selectedDate.isSelected()) {
+                                    selectedDate.clearSelector($tableTemplate)
+                                }
 
-                                selectedDate.setStateSelected(true)
+                                /**
+                                 * multi method selector event
+                                 */
+                                if (selectedDate.isSelected()) {
+                                    selectedDate.setStateSelected(false)
 
-                                selectedDate.set.setStartDom($(this))
-                                selectedDate.set.setFullDate(newYear, month, saveDate, 'start')
+                                    if ((newYear <= selectedDate.getSelectedDate().date.start.year) && (month <= selectedDate.getSelectedDate().date.start.month) && (saveDate <= selectedDate.getSelectedDate().date.start.day)) {
+                                        selectedDate.set.setEndDom(selectedDate.getSelectedDate().dom.start)
+                                        selectedDate.set.setFullDate(selectedDate.getSelectedDate().date.start.year, selectedDate.getSelectedDate().date.start.month, selectedDate.getSelectedDate().date.start.day, 'end')
+                                    } else {
+                                        selectedDate.set.setEndDom($(this))
+                                        selectedDate.set.setFullDate(newYear, month, saveDate, 'end')
+                                    }
+                                    selectedDate.getSelectedDate().dom.end.addClass('szCalendar-selected')
 
-                                selectedDate.getSelectedDate().dom.start.addClass('szCalendar-selected')
+                                    // update date in input
+                                    $tableTemplate.find('[calendar-object="multi-end-date"]').val(selectedDate.getSelectedDate().date.end.full)
+                                    $tableTemplate.find('[calendar-object="multi-end-date"]').focus()
 
-                                // update date in input
-                                $tableTemplate.find('[calendar-object="multi-start-date"]').val(selectedDate.getSelectedDate().date.start.full)
+                                } else {
+                                    // set active state
+                                    $tableTemplate.find('[calendar-object="multi-start-date"]').focus()
+
+                                    selectedDate.setStateSelected(true)
+
+                                    selectedDate.set.setStartDom($(this))
+                                    selectedDate.set.setFullDate(newYear, month, saveDate, 'start')
+
+                                    selectedDate.getSelectedDate().dom.start.addClass('szCalendar-selected')
+
+                                    // update date in input
+                                    $tableTemplate.find('[calendar-object="multi-start-date"]').val(selectedDate.getSelectedDate().date.start.full)
+                                }
                             }
-                        }
-                    })
+                        })
+                    }
 
                     if(getDay(date) % 7 == 6) {
                         documentCreate.append('</tr><tr>')
