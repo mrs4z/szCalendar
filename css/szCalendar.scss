@@ -59,6 +59,7 @@ $noActiveDays: #BDBDBD;
 
       display: flex;
       flex-direction: row;
+      flex-wrap: wrap;
       align-items: center;
       margin-right: -10px;
 
@@ -77,6 +78,12 @@ $noActiveDays: #BDBDBD;
         border-radius: 5px;
         font-size: 12pt;
         padding: 5px;
+
+        &:disabled {
+          cursor: not-allowed;
+          opacity: 0.7;
+          background: $hoverBackground;
+        }
       }
     }
 
@@ -157,6 +164,7 @@ $noActiveDays: #BDBDBD;
 }
 
 table.szCalendar__table {
+  width: 100%;
   box-sizing: border-box;
   border-collapse: collapse;
 
