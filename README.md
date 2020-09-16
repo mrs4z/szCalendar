@@ -32,9 +32,13 @@ Calendar Plugin for jQuery
 
 # Пример
 ### HTML
-`<div id="calendar"></div>`
+```HTML
+<div id="calendar"></div>
+```
+
 ### JS
-`$('#calendar').szCalendar({
+```JS
+$('#calendar').szCalendar({
         method: 1,
         calendarsCount: 2,
         setup: true,
@@ -53,4 +57,5 @@ Calendar Plugin for jQuery
                 }
             }
         }
-    })`
+    })
+```
