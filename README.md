@@ -59,3 +59,6 @@ $('#calendar').szCalendar({
         }
     })
 ```
+![example calendar](https://github.com/mrs4z/szCalendar/blob/master/readme/Calendar.png)
+
+
