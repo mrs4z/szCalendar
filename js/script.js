@@ -1,9 +1,9 @@
 $(document).ready(function() {
     $('#calendar').szCalendar({
         method: 1,
-        calendarsCount: 1,
-        setup: false,
-        input: false,
+        calendarsCount: 2,
+        setup: true,
+        input: true,
         editable: true,
         params: {
             multi: {
