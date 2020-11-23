@@ -1,165 +1,222 @@
 .szCalendar {
-  width: 100%;
+  font-family: Roboto, sans-serif;
   border-radius: 5px;
-  border: 1px solid #f8f8f8;
-  -webkit-box-shadow: 0px 0px 17px -2px rgba(0, 0, 0, 0.23);
-  -moz-box-shadow: 0px 0px 17px -2px rgba(0, 0, 0, 0.23);
-  box-shadow: 0px 0px 17px -2px rgba(0, 0, 0, 0.23);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.szCalendar__multi {
-  display: flex;
-  flex-direction: row;
-}
-.szCalendar__multi-setup {
-  width: 180px;
-  border-right: 1px solid #E9E9E9;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
-.szCalendar__multi-setup a {
-  color: #ff815c;
-  text-decoration: none;
-  margin-bottom: 15px;
-  font-size: 11pt;
-}
-.szCalendar__multi-setup a:last-child {
-  margin-bottom: 0px !important;
-}
-.szCalendar__multi-setup a:hover {
-  text-decoration: underline;
-}
-.szCalendar__multi-form-inputs {
-  padding: 15px;
-  border-bottom: 1px solid #E9E9E9;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-right: -10px;
-}
-.szCalendar__multi-form-inputs div {
-  margin-right: 10px;
-}
-.szCalendar__multi-form-inputs-title {
-  color: #7a7a7a;
-  font-size: 11pt;
-}
-.szCalendar__multi-form-inputs input {
-  max-width: 100px;
-  border: 1px solid #dedede;
-  border-radius: 5px;
-  font-size: 12pt;
-  padding: 5px;
-}
-.szCalendar__multi-form-inputs input:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
-  background: #E9E9E9;
-}
-.szCalendar__body {
-  display: flex;
-  flex-direction: row;
+  border: 1px solid #E6E6E6;
+  box-sizing: border-box;
   padding: 10px;
-  margin: -10px;
-}
-.szCalendar__body-item {
-  margin: 10px;
-  display: flex;
-  flex-direction: column;
-}
-.szCalendar__body-item-menu {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin: -10px;
-  padding-bottom: 15px;
-}
-.szCalendar__body-item-menu-button {
-  flex-grow: 1;
-  text-align: center;
-  padding: 5px;
-  background: #E9E9E9;
-  border-radius: 5px;
-  font-weight: bold;
-  margin: 10px;
-  cursor: pointer;
   font-size: 10pt;
 }
-.szCalendar__body-item-menu-button:hover {
-  background: #dedede;
+.szCalendar__time {
+  margin-bottom: 10px;
 }
-.szCalendar__header {
-  width: 100%;
-  height: 50px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
+.szCalendar__time:last-child {
+  margin-bottom: 0px;
 }
-.szCalendar__header-title {
-  margin-left: 10px;
-  margin-right: 10px;
-  width: 100%;
-  text-align: center;
-  padding: 10px;
-  background: #E9E9E9;
+.szCalendar__time-double {
+  font-size: 20pt;
   font-weight: bold;
 }
-.szCalendar__header-mini {
-  padding: 10px;
-  background: #E9E9E9;
+.szCalendar__time-button {
+  flex: 1 1 auto;
+  max-width: 40px;
+  padding: 15px;
+  background: #E6E6E6;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14pt;
+  color: #8D8D8D;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  transition: all 0.1s ease-in-out;
+}
+.szCalendar__time-button:active {
+  background: #acacac !important;
+}
+.szCalendar__time-button:hover {
+  background: #D4D4D4;
+  color: #000;
+}
+.szCalendar__time input {
+  flex: 1 1 auto;
+  max-width: 40px;
+  padding: 15px;
+  background: #E6E6E6;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  -webkit-appearance: none;
+  border: 0;
+  font-size: 14pt;
+}
+.szCalendar__time input::-webkit-outer-spin-button,
+.szCalendar__time input::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0;
+  /* <-- Apparently some margin are still there even though it's hidden */
+}
+.szCalendar__absolute {
+  position: absolute;
+  z-index: 9999999;
+  background: #fff;
+  -webkit-box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.1);
+}
+.szCalendar__hidded {
+  display: none;
+}
+.szCalendar__icon-clear {
+  padding: 7px;
+  border-radius: 5px;
+  background: #E6E6E6;
+  font-weight: bold;
   cursor: pointer;
 }
-.szCalendar__header-mini:hover {
-  background: #dedede;
+.szCalendar__icon-clear:hover {
+  background: #d2d2d2;
 }
-
-.debug {
-  display: inline-flex;
-}
-
-table.szCalendar__table {
+.szCalendar__step {
   width: 100%;
+  height: 25px;
+  background: #E6E6E6;
+  color: #a0a0a0;
+  margin-top: 5px;
+  border-radius: 5px;
+  line-height: 25px;
+  text-align: center;
+}
+.szCalendar__step.active {
+  background: #ffdecd;
+}
+.szCalendar__step.success {
+  background: #dbfdc5;
+}
+.szCalendar__margin-bottom-10 {
+  margin-bottom: 10px !important;
+}
+.szCalendar__row {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+.szCalendar__row-inputs {
+  color: #8D8D8D;
+}
+.szCalendar__row-inputs input {
+  max-width: 150px;
+  -webkit-appearance: none;
+  border: 1px solid #E6E6E6;
+  font-size: 12pt;
+  border-radius: 4px;
+  padding: 5px;
+}
+.szCalendar__row-inputs input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+.szCalendar__row-buttons {
+  justify-content: space-between;
+  font-size: 10pt;
+}
+.szCalendar__row-buttons > div {
+  flex: 1 1 auto;
+  padding: 7px;
+  background: #E6E6E6;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+}
+.szCalendar__row-buttons > div:hover {
+  background: #D4D4D4;
+}
+.szCalendar__column {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.szCalendar table {
   box-sizing: border-box;
   border-collapse: collapse;
+  border: 0px !important;
 }
-table.szCalendar__table th {
-  font-size: 10pt;
-}
-table.szCalendar__table td {
+.szCalendar table thead th {
   padding: 10px;
-  cursor: pointer;
+}
+.szCalendar table tbody tr {
+  border: 0px !important;
+}
+.szCalendar table tbody tr td {
+  padding: 10px;
   text-align: center;
-  font-size: 10pt;
+  cursor: pointer;
+  border: 0px !important;
 }
-table.szCalendar__table td:hover {
-  background: #E9E9E9;
+.szCalendar table tbody tr td.around {
+  color: #8D8D8D !important;
 }
-
-.szCalendar-no-active {
-  color: #BDBDBD;
+.szCalendar table tbody tr td.around.selected {
+  background: #ffdecd;
 }
-
-.szCalendar-today {
-  color: #FF4C4C;
-  border-bottom: 1px solid #FF4C4C;
+.szCalendar table tbody tr td.around.active {
+  background: #fc9974 !important;
+  color: #fff !important;
 }
-
-.szCalendar-interval-selected {
-  background: #ffcead;
+.szCalendar table tbody tr td.around:hover {
+  background: #e9e9e9;
 }
-
-.szCalendar-selected {
-  background: #ff6738;
+.szCalendar table tbody tr td.around:hover.dateDisabled {
+  background: #FFFFFF !important;
+  color: #D5D5D5 !important;
+  cursor: not-allowed;
+}
+.szCalendar table tbody tr td:hover {
+  background: #FEEAD3;
+}
+.szCalendar table tbody tr td:hover.dateDisabled {
+  background: #FFFFFF !important;
+  color: #D5D5D5 !important;
+  cursor: not-allowed;
+}
+.szCalendar table tbody tr td.cursor-not {
+  cursor: not-allowed !important;
+}
+.szCalendar table tbody tr td.toDay {
+  color: #f05a28;
+}
+.szCalendar table tbody tr td.dateDisabled {
+  color: #D5D5D5 !important;
+}
+.szCalendar table tbody tr td.active {
+  background: #f05a28 !important;
   color: #fff;
 }
-.szCalendar-selected:hover {
-  background: #ff3400 !important;
+.szCalendar table tbody tr td.selected {
+  background: #FEEAD3;
+}
+.szCalendar__flex-ac {
+  align-items: center;
+}
+.szCalendar__flex-sb {
+  justify-content: space-between;
+}
+.szCalendar__flex-wrap {
+  flex-wrap: wrap;
+}
+.szCalendar__flex-padding {
+  box-sizing: border-box !important;
+  margin: 0 0px;
+}
+.szCalendar__flex-padding > div {
+  margin: 0 5px;
 }
 
 /*# sourceMappingURL=szCalendar.css.map */

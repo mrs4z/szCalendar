@@ -1,909 +1,1325 @@
-(function($ ){
+(function($ ) {
+    "use strict"
 
-    /**
-     * CALENDAR SELECTOR METHODS
-     */
-    var calendarSelector = {
-        solo: function() {
-            let selectedDate = {
-                dom: null,
-                date: {
-                    year: 0,
-                    month: 0,
-                    day: 0,
-                    full: "",
-                    timestamp: 0
-                }
-            }
-
-            return {
-                // selected date func result
-                getSelectedDate: function() {
-                    return selectedDate
-                },
-                setSelectedDate: function(params) {
-                    selectedDate.dom = params.dom || null
-                    selectedDate.date.year = params.date.year || 0
-                    selectedDate.date.month = params.date.month || 0
-                    selectedDate.date.day = params.date.day || 0
-
-                    selectedDate.date.full = `${selectedDate.date.year}-${selectedDate.date.month + 1}-${selectedDate.date.day}`
-                    selectedDate.date.timestamp = new Date(selectedDate.date.year, selectedDate.date.month, selectedDate.date.day).getTime()
-                },
-                set: {
-                    setDom: function(dom) { selectedDate.dom = dom },
-                    setYear: function(year) { selectedDate.date.year = year },
-                    setMonth: function(month) { selectedDate.date.month = month },
-                    setDay: function(day) { selectedDate.date.day = day }
-                }
-            }
-        },
-        multi: function() {
-            let selectedDateMulti = {
-                firstSettings: false,
-                dom: {
-                    start: null,
-                    end: null
-                },
-                date: {
-                    start: {
-                        year: 0,
-                        month: 0,
-                        day: 0,
-                        full: "",
-                        timestamp: 0
-                    }, end: {
-                        year: 0,
-                        month: 0,
-                        day: 0,
-                        full: "",
-                        timestamp: 0
-                    }
-                }
-            }
-
-            // state
-            let stateSelected = false
-
-            return {
-                clearSelector: function(dom) {
-                    this.clearSelectorItem('start', dom)
-                    this.clearSelectorItem('end', dom)
-
-                    // clear selected block
-                    this.clearRangeDom(dom)
-                },
-                clearSelectorItem: function(type, dom) {
-                    if(selectedDateMulti['dom'][type] != null) {
-                        selectedDateMulti['dom'][type].removeClass('szCalendar-selected')
-                        selectedDateMulti['dom'][type] = null
-                    }
-
-                    this.clearRangeDom(dom)
-                },
-                clearRangeDom: function(dom) {
-                    $.each(dom.find('.szCalendar-interval-selected'), function(index, item) {
-                        $(item).removeClass('szCalendar-interval-selected')
-                    })
-                },
-                setActiveDom: function(type) {
-                    selectedDateMulti['dom'][type].addClass('szCalendar-selected')
-                },
-                isSelected: function() {
-                    return stateSelected == true
-                },
-                setStateSelected: function(state) {
-                    stateSelected = state
-                },
-                // selected date func result
-                getSelectedDate: function() {
-                    return selectedDateMulti
-                },
-                setSelectedDate: function(params) {
-
-                    selectedDateMulti.date.full = `${selectedDateMulti.date.year}-${selectedDateMulti.date.month + 1}-${selectedDateMulti.date.day}`
-                    selectedDateMulti.date.timestamp = new Date(selectedDateMulti.date.year, selectedDateMulti.date.month, selectedDateMulti.date.day).getTime()
-                },
-                set: {
-                    setStartDom: function(dom) { selectedDateMulti.dom.start = dom },
-                    setEndDom: function(dom) { selectedDateMulti.dom.end = dom },
-                    setDom: function(dom, type) { selectedDateMulti['dom'][type] = dom },
-                    setDay: function(day, type) { selectedDateMulti['date'][type]['day'] = day },
-                    setYear: function(year, type) { selectedDateMulti['date'][type]['year'] = year },
-                    setMonth: function(month, type) { selectedDateMulti['date'][type]['month'] = month },
-                    setFullDate: function(year, month, day, type) {
-                        // check date
-                        let currentDate = new Date()
-
-                        if(year < 1900) {
-                            year = currentDate.getFullYear()
-                        }
-
-                        if(month < 0 || month > 11) {
-                            month = currentDate.getMonth()
-                        }
-
-                        let checkDaysByDate = new Date(year, month + 1, 0)
-
-                        if(day < 1 || day > checkDaysByDate.getDate()) {
-                            day = 1
-                        }
-
-                        this.setDay(day, type)
-                        this.setMonth(month, type)
-                        this.setYear(year, type)
-
-                        this.createFullAndTimestamp({ year: year, month: month, day: day }, type)
-                    },
-                    createFullAndTimestamp:  function(params, type) {
-                        selectedDateMulti['date'][type]['full'] = `${params.year}-${params.month + 1}-${params.day}`
-                        selectedDateMulti['date'][type]['timestamp'] = new Date(params.year, params.month, params.day).getTime()
-                    }
-                }, setup: {
-                    toDay: function() {
-                        // create to day
-                        let toDay = new Date()
-                        let resultDate = this.formatterDate(toDay.getFullYear(), toDay.getMonth() + 1, toDay.getDate())
-
-                        return {
-                            start: resultDate,
-                            end: resultDate
-                        }
-                    }, yestDay: function() {
-                        // create yest day
-                        let toDay = new Date()
-                        toDay.setDate(toDay.getDate() - 1)
-                        let resultDate = this.formatterDate(toDay.getFullYear(), toDay.getMonth() + 1, toDay.getDate())
-
-                        return {
-                            start: resultDate,
-                            end: resultDate
-                        }
-                    }, lastSevenDay: function() {
-                        // create yest day
-                        let toDay = new Date()
-                        let sevenDay = new Date()
-
-                        sevenDay.setDate(toDay.getDate() - 7)
-
-                        let resultToday = this.formatterDate(toDay.getFullYear(), toDay.getMonth() + 1, toDay.getDate())
-                        let resultSevenDay = this.formatterDate(sevenDay.getFullYear(), sevenDay.getMonth() + 1, sevenDay.getDate())
-
-                        return {
-                            start: resultSevenDay,
-                            end: resultToday
-                        }
-                    }, onThisWeek: function() {
-                        // create yest day
-                        let toDay = new Date()
-
-                        // create on this week
-                        let dateOnWeek = new Date()
-
-                        // set date to day
-                        dateOnWeek.setDate(toDay.getDate() - toDay.getDay() + 1)
-
-                        let resultOnWeek = this.formatterDate(dateOnWeek.getFullYear(), dateOnWeek.getMonth() + 1, dateOnWeek.getDate())
-                        let resultToDay = this.formatterDate(toDay.getFullYear(), toDay.getMonth() + 1, toDay.getDate())
-
-                        return {
-                            start: resultOnWeek,
-                            end: resultToDay
-                        }
-                    }, onPastWeek: function() {
-                        // create yest day
-                        let toDay = new Date()
-
-                        // create on this week
-                        let dateOnWeek = new Date()
-
-                        // set date to day
-                        dateOnWeek.setDate(toDay.getDate() - toDay.getDay() - 6)
-                        toDay.setDate(toDay.getDate() - toDay.getDay())
-
-                        let resultOnWeek = this.formatterDate(dateOnWeek.getFullYear(), dateOnWeek.getMonth() + 1, dateOnWeek.getDate())
-                        let resultToDay = this.formatterDate(toDay.getFullYear(), toDay.getMonth() + 1, toDay.getDate())
-
-                        return {
-                            start: resultOnWeek,
-                            end: resultToDay
-                        }
-                    }, onThisMonth: function() {
-                        // create yest day
-                        let toDay = new Date()
-                        let startMonth = new Date()
-
-                        startMonth.setDate(1)
-
-                        let resultStartMonth = this.formatterDate(startMonth.getFullYear(), startMonth.getMonth() + 1, startMonth.getDate())
-                        let resultToDay = this.formatterDate(toDay.getFullYear(), toDay.getMonth() + 1, toDay.getDate())
-
-                        return {
-                            start: resultStartMonth,
-                            end: resultToDay
-                        }
-                    }, onPastMonth: function() {
-                        // create yest day
-                        let startMonth = new Date()
-                        let endMonth = new Date()
-
-                        // for count days in month
-                        let countDays = new Date(startMonth.getFullYear(), startMonth.getMonth() - 1, 0).getDate()
-
-                        startMonth.setMonth(startMonth.getMonth() - 1)
-                        startMonth.setDate(1)
-
-                        endMonth.setMonth(endMonth.getMonth() - 1)
-                        endMonth.setDate(countDays)
-
-                        let resultStartMonth = this.formatterDate(startMonth.getFullYear(), startMonth.getMonth() + 1, startMonth.getDate())
-                        let resultEndMonth = this.formatterDate(endMonth.getFullYear(), endMonth.getMonth() + 1, endMonth.getDate())
-
-                        return {
-                            start: resultStartMonth,
-                            end: resultEndMonth
-                        }
-                    }, onThisYear: function() {
-                        // create yest day
-                        let startYear = new Date()
-                        let toDay = new Date()
-
-                        // for count days in month
-                        startYear.setFullYear(toDay.getFullYear())
-                        startYear.setMonth(0)
-                        startYear.setDate(1)
-
-                        let resultStartYear = this.formatterDate(startYear.getFullYear(), startYear.getMonth() + 1, startYear.getDate())
-                        let resultToDay = this.formatterDate(toDay.getFullYear(), toDay.getMonth() + 1, toDay.getDate())
-
-                        return {
-                            start: resultStartYear,
-                            end: resultToDay
-                        }
-                    },
-                    formatterDate: function(year, month, date) {
-                        return `${year}-${month}-${date}`
-                    },
-                }
-            }
-        }
-    }
-
-    const ENUM_METHODS = {
-        SOLO: 0,
-        MULTI: 1
-    }
-
-    const VARS = {
-        MAX_CALENDAR_COUNT: 2
-    }
-
-    // init solo selector
-    var soloCreate = new calendarSelector.solo()
-    var multiCreate = new calendarSelector.multi()
-
-    /**
-     * methods
-     */
-    var methods = {
+    const methods = {
         init: function(options) {
+            // init
             let _self = $(this)
 
-            // default settings
-            var settings = $.extend({
-                method: 0,
-                setup: true,
-                editable: true,
-                input: true,
-                calendarsCount: VARS.MAX_CALENDAR_COUNT,
-                startDate: {
-                    year: new Date().getFullYear(),
-                    month: new Date().getMonth() + 1,
-                    day: null
+            // get type
+            let getTypeTag = $(this).prop('tagName')
+
+            // result
+            // for icons
+            let icons = {
+                left: `<`,
+                right: `>`,
+                clear: `x`,
+                time: {
+                    up: 'UP',
+                    down: 'DW',
+                    double: ':'
+                }
+            }
+
+            // for once item
+            let activeItem = null, stateShowed = 0
+
+            // for time
+            let activeTime = {
+                hours: 0,
+                minutes: 0
+            }
+
+            // for interval items
+            let activeItemInterval = {
+                date: {
+                    startDate: null,
+                    startTime: null,
+                    endDate: null,
+                    endTime: null
                 },
-                // for multi
-                params: {
-                    multi: {
+                state: 0      // 0 - not active, 1 - selection
+            }
+
+            let resultSettings = {
+                settings: null,
+                dom: null,
+                date: null,
+                elements: {
+                    inputDom: null
+                },
+                type: null,
+                self: null
+            }
+
+            // result icons
+            let resultICONS = typeof szCalendarICONS != "undefined" ? szCalendarICONS : icons
+
+
+
+            ////////////////////// FOR RESULT /////////////////////
+            let resultDate = null
+
+            function updateResultDate() {
+                if(resultSettings.settings.type == 0) {
+                    resultDate = {
+                        stampDate: Utils.dateToFormat(activeItem, true).stampDate,
+                        stringDate: Utils.dateSimple(activeItem, true)
+                    }
+                } else {
+                    resultDate = {
                         start: {
-                            year: new Date().getFullYear(),
-                            month: new Date().getMonth() + 1,
-                            day: new Date().getDate()
-                        }, end: {
-                            year: new Date().getFullYear(),
-                            month: new Date().getMonth() + 1,
-                            day: new Date().getDate()
+                            stampDate: Utils.dateToFormat({ date: activeItemInterval.date.startDate, time: activeItemInterval.date.startTime }).stampDate,
+                            stringDate: Utils.dateSimple(activeItemInterval.date.startDate, true)
+                        },
+                        end: {
+                            stampDate: Utils.dateToFormat({ date: activeItemInterval.date.endDate, time: activeItemInterval.date.endTime }).stampDate,
+                            stringDate: Utils.dateSimple(activeItemInterval.date.endDate, true)
                         }
                     }
+                }
+
+                $(_self).data('getData', resultDate)
+            }
+
+            function updateResultTime() {
+                let resultTime = `${activeTime.hours}:${activeTime.minutes}`
+
+                $(_self).data('getData', resultTime);
+            }
+
+
+            const symbolsSplit = /[. | \/ | -]+/
+
+            const Utils = {
+                dateToFormat: function (date, normalDate = false) {
+                    let resultDate = null, stampDate = 0
+
+                    if (Object.prototype.toString.call(date) == "[object Object]") {
+                        // split date
+                        let splitDate = date.date.split('-').map(Number)
+
+                        // result
+                        resultDate = {
+                            year: splitDate[0],
+                            month: !normalDate ? splitDate[1] + 1 : splitDate[1],
+                            day: splitDate[2]
+                        }
+
+                        // get date
+                        let splitTime = date.time.split(':')
+
+                        // timestamp
+                        stampDate = new Date(resultDate.year, splitDate[1], resultDate.day, splitTime[0], splitTime[1]).getTime()
+                    } else if (Object.prototype.toString.call(date) == "[object Number]") {
+                        let createDate = new Date(date)
+
+                        // to timestamp
+                        stampDate = createDate.getTime()
+
+                        // result
+                        resultDate = {
+                            year: createDate.getFullYear(),
+                            month: !normalDate ? createDate.getMonth() + 1 : createDate.getMonth(),
+                            day: createDate.getDate()
+                        }
+                    } else {
+                        // split date
+                        let splitDate = date.split('-').map(Number)
+
+                        // result
+                        resultDate = {
+                            year: splitDate[0],
+                            month: !normalDate ? splitDate[1] + 1 : splitDate[1],
+                            day: splitDate[2]
+                        }
+
+                        // timestamp
+                        stampDate = new Date(resultDate.year, splitDate[1], resultDate.day).getTime()
+                    }
+
+                    let updateYear = resultSettings.settings.format.replace('YYYY', resultDate.year)
+                    let updateMonth = updateYear.replace('mm', resultDate.month)
+                    let updateDate = updateMonth.replace('dd', resultDate.day)
+
+                    return {
+                        stampDate: stampDate,
+                        stringDate: updateDate
+                    }
+                },
+                checkAndFormat: function (date) {
+                    let getDate = resultSettings.settings.format.split(symbolsSplit),
+                        getRealDate = Object.prototype.toString.call(date) == "[object Date]" ? Utils.dateToFormat(date.getTime()).stringDate.split(symbolsSplit).map(Number) : date.split(symbolsSplit).map(Number),
+                        resultDate = null, formatByPattern = null
+
+                    // if splitted ok
+                    if (getRealDate.length > 0) {
+                        formatByPattern = formatToDefault(getDate, getRealDate)
+                        resultDate = Utils.dateToFormat(formatByPattern).stringDate
+                    }
+
+                    function formatToDefault(listPattern, listReal) {
+                        let result = {year: 0, month: 0, day: 0}
+
+                        $.each(listPattern, function (index, item) {
+                            if (item == 'YYYY') {
+                                result.year = listReal[index]
+                            } else if (item == 'mm') {
+                                result.month = listReal[index]
+                            } else {
+                                result.day = listReal[index]
+                            }
+                        })
+
+                        return new Date(result.year, result.month - 1, result.day).getTime()
+                    }
+
+                    return {
+                        stringDate: resultDate,
+                        stampDate: formatByPattern
+                    }
+                },
+                dateSimple: function (date, toNormal = false) {
+                    let resultDate = null
+                    if (Object.prototype.toString.call(date) == "[object Number]") {
+                        // cr
+                        let createDate = new Date(date)
+                        resultDate = [createDate.getFullYear(), createDate.getMonth() + 1, createDate.getDate()]
+                    } else {
+                        // split date
+                        resultDate = date.split('-').map(Number)
+                    }
+
+                    console.log(resultDate)
+
+
+                    let resultMonth = toNormal ? resultDate[1] + 1 : resultDate[1] - 1
+
+                    return `${resultDate[0]}-${resultMonth}-${resultDate[2]}`
+                },
+                dateTime: function (date) {
+                    // ge type
+                    let getType = Object.prototype.toString.call(date), resultItem = null
+
+                    if (getType == "[object Number]") {
+                        // create date
+                        let createDate = new Date(date)
+
+                        resultItem = `${createDate.getHours()}:${createDate.getMinutes()}`
+                    } else if (getType == "[object String]") {
+                        let splitDate = date.split(' ')
+
+                        if (splitDate.length > 0) {
+                            let splitTime = splitDate[1].split(':').map(Number)
+                            resultItem = `${splitTime[0]}-${splitTime[1]}`
+                        } else {
+                            resultItem = '00:00'
+                        }
+                    } else {
+                        resultItem = '00:00'
+                    }
+
+                    return resultItem
+                },
+                showCalendarDate: function () {
+                    let getType = resultSettings.settings.showDate,
+                        callObject = Object.prototype.toString.call(getType), resultDate = null
+
+                    // array interval
+                    if (callObject == "[object Date]") {
+                        resultDate = {month: getType.getMonth() + 1, year: getType.getFullYear()}
+
+                    } else if (callObject == "[object Number]") {
+                        // format
+                        let toNormalDate = new Date(getType)
+
+                        // result
+                        resultDate = {month: toNormalDate.getMonth() + 1, year: toNormalDate.getFullYear()}
+                    }
+
+                    return resultDate
+                },
+                showStartDate: function () {
+                    let getType = resultSettings.settings.startDate,
+                        callObject = Object.prototype.toString.call(getType), resultDate = null
+
+                    if (callObject == "[object Array]") {
+                        let resultItem = []
+
+                        // get interval
+                        $.each(getType, function (index, item) {
+                            let callItem = Object.prototype.toString.call(item)
+
+                            resultItem.push(Utils.dateToFormat(item, false).stringDate)
+                        })
+
+                        // result date
+                        resultDate = resultItem
+                    } else if (callObject == "[object Date]") {
+                        resultDate = {month: getType.getMonth() + 1, year: getType.getFullYear()}
+
+                    } else if (callObject == "[object Number]") {
+                        // format
+                        let toNormalDate = new Date(getType)
+
+                        // result
+                        resultDate = {month: toNormalDate.getMonth() + 1, year: toNormalDate.getFullYear()}
+                    }
+
+                    return resultDate
+                }, getIcon: function () {
+                    return resultICONS
+                }
+            }
+
+            const calendarInit = {
+                createCalendar: function (month, year) {
+                    // dom create
+                    let $createDOM = $(`<table>
+                                <thead>
+                                <th>пн</th>
+                                <th>вт</th>
+                                <th>ср</th>
+                                <th>чт</th>
+                                <th>пт</th>
+                                <th>сб</th>
+                                <th>вс</th>
+                                </thead>
+                                <tbody></tbody>
+                            </table>`)
+
+                    // create to day date
+                    let createToDayDate = new Date()
+
+                    // dates
+                    let jsMONTH = month - 1
+
+                    // create
+                    let createDate = new Date(year, jsMONTH)
+
+                    let minDate = new Date(createDate.getFullYear(), createDate.getMonth() - 1, 0)
+                    let maxDate = new Date(createDate.getFullYear(), createDate.getMonth() + 1, 0)
+
+                    // start dom
+                    let $createLine = '<tr>'
+
+                    // start nulled params
+                    for (let i = 0; i < getDay(createDate); i++) {
+                        let isDisabled = false,
+                            resultDate = `${minDate.getFullYear()}-${minDate.getMonth() + 1}-${minDate.getDate() - getDay(createDate) + i + 1}`
+
+                        // check disabled date
+                        if (resultSettings.settings.maxDate) {
+                            if (Utils.dateToFormat(resultDate, true).stampDate >= Utils.dateToFormat(resultSettings.settings.maxDate, true).stampDate)
+                                isDisabled = true
+                        }
+
+                        $createLine += `<td class="around ${isDisabled ? 'dateDisabled ' : ' '}" data-real="${minDate.getFullYear()}-${minDate.getMonth() + 1}-${minDate.getDate() - getDay(createDate) + i + 1}" data-event="${isDisabled ? '' : 'select-date'}">${minDate.getDate() - getDay(createDate) + i + 1}</td>`
+                    }
+
+                    while (createDate.getMonth() == jsMONTH) {
+                        /** !!! CREATE ELEMENT DATE ITEM !!! */
+                        let resultDate = `${createDate.getFullYear()}-${jsMONTH}-${createDate.getDate()}`
+
+                        // check if's
+                        let isToDay = false, isDisabled = false
+
+                        // check disabled date
+                        if (resultSettings.settings.maxDate) {
+                            if (Utils.dateToFormat(resultDate, true).stampDate >= Utils.dateToFormat(resultSettings.settings.maxDate, true).stampDate)
+                                isDisabled = true
+                        }
+
+                        // check to day
+                        if (createToDayDate.getFullYear() == createDate.getFullYear() && createToDayDate.getMonth() == createDate.getMonth() && createToDayDate.getDate() == createDate.getDate())
+                            isToDay = true
+
+                        // result
+                        $createLine += `<td class="${isToDay ? 'toDay ' : ' '} ${isDisabled ? 'dateDisabled ' : ' '} ${resultSettings.settings.elements.inputsDisabled ? 'cursor-not ' : ' '}" data-real="${resultDate}" data-event="${isDisabled ? '' : 'select-date'}">${createDate.getDate()}</td>`
+
+                        if (getDay(createDate) % 7 == 6) {
+                            $createLine += `</tr><tr>`
+                        }
+
+                        createDate.setDate(createDate.getDate() + 1);
+                    }
+
+                    // start
+                    let startDate = 1
+
+                    // last
+                    for (let i = getDay(createDate); i < 7; i++) {
+                        let isDisabled = false,
+                            resultDate = `${maxDate.getFullYear()}-${maxDate.getMonth() + 1}-${startDate}`
+
+                        // check disabled date
+                        if (resultSettings.settings.maxDate) {
+                            if (Utils.dateToFormat(resultDate, true).stampDate >= Utils.dateToFormat(resultSettings.settings.maxDate, true).stampDate)
+                                isDisabled = true
+                        }
+
+                        $createLine += `<td class="around ${isDisabled ? 'dateDisabled ' : ' '}" data-real="${maxDate.getFullYear()}-${maxDate.getMonth() + 1}-${startDate}" data-event="${isDisabled ? '' : 'select-date'}">${startDate}</td>`
+                        startDate++
+                    }
+
+                    $createLine += '</tr>'
+
+                    $createDOM.find('tbody').append($createLine)
+
+                    // upper to line
+                    let getCountLines = $createDOM.find('tbody').find('tr').length, $lineApp = ``
+
+
+                    if (getCountLines > 4 && getCountLines < 6) {
+                        $lineApp += '<tr>'
+
+                        for (let i = 0; i < 7; i++) {
+
+                            let isDisabled = false,
+                                resultDate = `${maxDate.getFullYear()}-${maxDate.getMonth() + 1}-${startDate}`
+
+                            // check disabled date
+                            if (resultSettings.settings.maxDate) {
+                                if (Utils.dateToFormat(resultDate, true).stampDate >= Utils.dateToFormat(resultSettings.settings.maxDate, true).stampDate)
+                                    isDisabled = true
+                            }
+
+                            $lineApp += `<td class="around ${isDisabled ? 'dateDisabled ' : ' '}" data-real="${maxDate.getFullYear()}-${maxDate.getMonth() + 1}-${startDate}" data-event="${isDisabled ? '' : 'select-date'}">${startDate}</td>`
+                            startDate++
+                        }
+
+                        $lineApp += '</tr>'
+                    }
+
+                    $createDOM.find('tbody').append($lineApp)
+
+                    function getDay(date) {
+                        var day = date.getDay();
+                        if (day == 0) day = 7;
+                        return day - 1;
+                    }
+
+                    return $createDOM
+                },
+                once: {
+                    oneSelectEvent: function (dom) {
+                        dom.find('[data-event="select-date"]').click(function (e) {
+                            if (resultSettings.type == 'INPUT') {
+                                resultSettings.self.focus()
+                            }
+
+                            if (activeItem != null) {
+                                resultSettings.dom.find(`[data-real=${activeItem}]`).removeClass('active')
+                                activeItem = null
+                            }
+
+                            // self
+                            activeItem = $(this).attr('data-real')
+                            resultSettings.dom.find(`[data-real=${activeItem}]`).addClass('active')
+
+                            // by type
+                            if (resultSettings.type == 'INPUT') {
+                                resultSettings.self.val(Utils.dateToFormat(activeItem).stringDate)
+                            }
+
+                            if (resultSettings.settings.closeBySelect) {
+                                resultSettings.dom.hide()
+                                stateShowed = 0
+                            }
+
+                            updateResultDate()
+
+                            // blur
+                            if (resultSettings.type == 'INPUT') {
+                                resultSettings.self.blur()
+                            }
+
+                        })
+                    },
+                    loadSelectedItem: function () {
+                        if (activeItem != null) {
+                            resultSettings.dom.find(`[data-real="${activeItem}"]`).addClass('active')
+                        }
+                    }
+                },
+                interval: {
+                    intervalSelectEvent: function (dom) {
+                        if (resultSettings.settings.elements.inputsDisabled)
+                            return false
+
+                        // event click
+                        dom.find('[data-event="select-date"]').click(function (e) {
+                            if (activeItemInterval.state == 0) {
+                                // clear
+                                if (activeItemInterval.date.startDate != null) {
+                                    // clear class
+                                    resultSettings.dom.find(`[data-real=${activeItemInterval.date.startDate}]`).removeClass('active')
+                                    resultSettings.dom.find(`[data-real=${activeItemInterval.date.endDate}]`).removeClass('active')
+
+                                    // date
+                                    activeItemInterval.date.startDate = null
+                                    activeItemInterval.date.endDate = null
+
+                                    // time
+                                    activeItemInterval.date.startTime = null
+                                    activeItemInterval.date.endTime = null
+                                }
+
+                                // result
+                                calendarInit.interval.intervalRangeStyleClear()
+                                calendarInit.interval.clearIntervalClass()
+
+                                activeItemInterval.date.startDate = $(this).attr('data-real')
+                                activeItemInterval.date.startTime = "00:00"
+                                resultSettings.dom.find(`[data-real=${activeItemInterval.date.startDate}]`).addClass('active')
+
+                                // change state
+                                activeItemInterval.state = 1
+
+                                // for input interval
+                                if (resultSettings.settings.elements.inputs) {
+                                    // clear input
+                                    let getInput = resultSettings.dom.find('[data-type="input-interval"][data-interval-id="1"]')
+                                    // focus & clear & append
+                                    getInput.focus()
+                                    getInput.val(Utils.dateToFormat($(this).attr('data-real')).stringDate)
+                                }
+
+                                calendarInit.elements.stepActive.setStepActive(1)
+                            } else {
+                                let checkDate = null
+
+                                // check
+                                if (Utils.dateToFormat($(this).attr('data-real')).stampDate < Utils.dateToFormat(activeItemInterval.date.startDate).stampDate) {
+                                    return false
+                                }
+
+
+                                if (Utils.dateToFormat($(this).attr('data-real')).stampDate < Utils.dateToFormat(activeItemInterval.date.startDate).stampDate) {
+                                    let createDateNew = new Date(Utils.dateToFormat(activeItemInterval.date.startDate, true).stampDate)
+                                    checkDate = `${createDateNew.getFullYear()}-${createDateNew.getMonth()}-${createDateNew.getDate()}`
+                                } else {
+                                    checkDate = $(this).attr('data-real')
+                                }
+
+                                // end item
+                                activeItemInterval.date.endDate = checkDate
+                                activeItemInterval.date.endTime = '23:59'
+                                resultSettings.dom.find(`[data-real=${activeItemInterval.date.endDate}]`).addClass('active')
+
+                                // update date
+                                updateResultDate()
+
+                                // change state
+                                activeItemInterval.state = 0
+
+                                // for input interval
+                                if (resultSettings.settings.elements.inputs) {
+                                    // clear input
+                                    let getInput = resultSettings.dom.find('[data-type="input-interval"][data-interval-id="2"]')
+                                    // focus & clear & append
+                                    getInput.focus()
+                                    getInput.val(Utils.dateToFormat(checkDate).stringDate)
+                                }
+
+                                calendarInit.elements.stepActive.setStepActive(2)
+                            }
+                        })
+
+                        // for selector
+                        dom.find('[data-event="select-date"]').hover(function (e) {
+                            if (activeItemInterval.state == 1) {
+                                calendarInit.interval.intervalStyle(activeItemInterval.date.startDate, $(this).attr('data-real'))
+                            }
+                        })
+                    },
+                    intervalRangeStyle: function (start, end) {
+                        // set start & end interval
+                        start != null ? resultSettings.dom.find(`[data-real="${start}"]`).addClass('active') : null
+                        end != null ? resultSettings.dom.find(`[data-real="${end}"]`).addClass('active') : null
+                    },
+                    intervalRangeStyleClear: function () {
+                        resultSettings.dom.find('.active').removeClass('active')
+                    },
+                    intervalStyle: function (start, end) {
+                        // get date start
+                        let getStartDate = start.split('-').map(Number)
+                        let getHoverDate = end.split('-').map(Number)
+
+                        // result
+                        calendarInit.interval.clearIntervalClass()
+
+                        // load
+                        for (let year = getStartDate[0]; year <= getHoverDate[0]; year++) {
+                            let startMonth = 0, endMonth = 0
+
+                            if (getStartDate[1] == 11 && getStartDate[0] < getHoverDate[0]) {
+                                if (year > getStartDate[0]) {
+                                    startMonth = 0
+                                    endMonth = getHoverDate[1]
+                                } else {
+                                    startMonth = 11
+                                    endMonth = 11
+                                }
+                            } else {
+                                startMonth = getStartDate[1]
+                                endMonth = getHoverDate[1]
+                            }
+
+                            for (let month = startMonth; month <= endMonth; month++) {
+                                let startDay = 0, endDay = 0
+
+                                if (getStartDate[1] == 11 && getStartDate[0] < getHoverDate[0]) {
+                                    if (getStartDate[1] != month && getHoverDate[1] != month) {
+                                        startDay = 0
+                                        endDay = 32
+                                    } else {
+                                        if (year == getStartDate[0]) {
+                                            startDay = getStartDate[2]
+                                            endDay = 32
+                                        } else {
+                                            startDay = 0
+                                            endDay = getHoverDate[2]
+                                        }
+                                    }
+                                } else {
+                                    // check month
+                                    if (getStartDate[1] != month && getHoverDate[1] != month) {
+                                        startDay = 0
+                                        endDay = 32
+                                    } else if (getStartDate[1] == month && getStartDate[1] < getHoverDate[1]) {
+                                        startDay = getStartDate[2]
+                                        endDay = 32
+                                    } else if (month == getHoverDate[1] && getStartDate[1] < getHoverDate[1]) {
+                                        startDay = 1
+                                        endDay = getHoverDate[2]
+                                    } else {
+                                        startDay = getStartDate[2]
+                                        endDay = getHoverDate[2]
+                                    }
+                                }
+
+                                for (let day = startDay; day < endDay; day++) {
+                                    resultSettings.dom.find(`[data-real="${year}-${month}-${day}"]`).addClass('selected')
+                                }
+                            }
+                        }
+                    },
+                    clearIntervalClass: function () {
+                        resultSettings.dom.find('.selected').removeClass('selected')
+                    }
+                },
+                barItem: {
+                    resultRealMonth: function (month, year) {
+                        let ListMonths = ['янв', 'фев', 'мар', 'апр', 'май', 'июн', 'июль', 'авг', 'сент', 'окт', 'нояб', 'дек']
+
+                        return `${ListMonths[month - 1]}. ${year}`
+                    },
+                    getDate: function () {
+                        // real date to js month
+                        let getRealMonth = resultSettings.date.month
+
+                        // result
+                        return {
+                            leftPart: {month: getRealMonth, year: resultSettings.date.year},
+                            rightPart: {
+                                month: getRealMonth + 1 == 13 ? 1 : getRealMonth + 1,
+                                year: getRealMonth + 1 == 13 ? resultSettings.date.year + 1 : resultSettings.date.year
+                            },
+                        }
+                    },
+                    setBarByDate: function () {
+                        if (resultSettings.settings.count == 1) {
+                            // get data
+                            let getLeftPart = calendarInit.barItem.getDate().leftPart
+
+                            // update
+                            resultSettings.dom.find('[data-change="name-data"]').html(`${calendarInit.barItem.resultRealMonth(getLeftPart.month, getLeftPart.year)}`)
+                        } else {
+                            let getRightPart = calendarInit.barItem.getDate().rightPart
+                            let getLeftPart = calendarInit.barItem.getDate().leftPart
+
+                            // two calendars
+                            resultSettings.dom.find('[data-change="prev-data"]').html(`${calendarInit.barItem.resultRealMonth(getLeftPart.month, getLeftPart.year)}`)
+                            resultSettings.dom.find('[data-change="next-data"]').html(`${calendarInit.barItem.resultRealMonth(getRightPart.month, getRightPart.year)}`)
+                        }
+                    },
+                    onChangeMonth: function () {
+                        resultSettings.dom.find('[data-event="change"]').click(function () {
+                            // get type
+                            let getType = $(this).attr('data-type')
+                            let getDate = resultSettings.date, resultDate = null
+
+                            // mex
+                            if (getType == 'next') {
+                                resultDate = {
+                                    month: getDate.month + 1 == 13 ? 1 : getDate.month + 1,
+                                    year: getDate.month + 1 == 13 ? getDate.year + 1 : getDate.year
+                                }
+                            } else {
+                                resultDate = {
+                                    month: getDate.month - 1 == 0 ? 12 : getDate.month - 1,
+                                    year: getDate.month - 1 == 0 ? getDate.year - 1 : getDate.year
+                                }
+                            }
+
+                            // update date & calendar
+                            resultSettings.date = resultDate
+
+                            calendarInit.updateCalendar()
+                        })
+                    }
+
+                },
+                setUp: function () {
+                    // set pre load params
+                    if (resultSettings.settings.startDate != null) {
+                        if (resultSettings.settings.elements.inputs) {
+                            if (resultSettings.settings.type == 0) {
+                                resultSettings.dom.find('[data-type="input-interval"][data-interval-id="1"]').val('ok da')
+                            } else {
+                                console.log(Utils.showStartDate())
+                                resultSettings.dom.find('[data-type="input-interval"][data-interval-id="1"]').val(Utils.showStartDate()[0])
+                                resultSettings.dom.find('[data-type="input-interval"][data-interval-id="2"]').val(Utils.showStartDate()[1])
+                            }
+                        }
+
+                        if (resultSettings.settings.type == 1) {
+                            // set
+                            activeItemInterval.date.startDate = Utils.dateSimple(resultSettings.settings.startDate[0])
+                            activeItemInterval.date.startTime = Utils.dateTime(resultSettings.settings.startDate[0])
+
+                            activeItemInterval.date.endDate = Utils.dateSimple(resultSettings.settings.startDate[1])
+                            activeItemInterval.date.endTime = Utils.dateTime(resultSettings.settings.startDate[1])
+
+                            updateResultDate()
+                        } else {
+                            activeItem = Utils.dateSimple(resultSettings.settings.startDate)
+                        }
+                    }
+
+                    // update calendar
+                    calendarInit.updateCalendar()
+
+                    if (resultSettings.settings.startDate != null) {
+                        if (resultSettings.settings.type == 1) {
+                            // update
+                            calendarInit.interval.intervalStyle(activeItemInterval.date.startDate, activeItemInterval.date.endDate)
+                        }
+                    }
+
+                    // add events
+                    calendarInit.barItem.onChangeMonth()
+                    calendarInit.elements.stepActive.setStepActive(0)
+                },
+                updateCalendar: function () {
+                    // create calendars
+                    let $domCalendar = calendarInit.createCalendar(calendarInit.barItem.getDate().leftPart.month, calendarInit.barItem.getDate().leftPart.year),
+                        $domCalendarTwo = null
+
+                    if (resultSettings.settings.count == 2)
+                        $domCalendarTwo = calendarInit.createCalendar(calendarInit.barItem.getDate().rightPart.month, calendarInit.barItem.getDate().rightPart.year)
+
+                    // append to all dom
+                    resultSettings.dom.find('[data-calendar="1"]').html($domCalendar)
+
+                    if (resultSettings.settings.count == 2)
+                        resultSettings.dom.find('[data-calendar="2"]').html($domCalendarTwo)
+
+                    if (resultSettings.settings.type == 1) {
+                        if (activeItemInterval.date.startDate) {
+                            calendarInit.interval.intervalRangeStyle(activeItemInterval.date.startDate, activeItemInterval.date.endDate)
+
+                            if (activeItemInterval.state != 1)
+                                calendarInit.interval.intervalStyle(activeItemInterval.date.startDate, activeItemInterval.date.endDate)
+                        }
+
+                        // TODO : SET UP INTERVAL AND ONCE EVENTS
+                        calendarInit.interval.intervalSelectEvent($domCalendar)
+
+                        if (resultSettings.settings.count == 2)
+                            calendarInit.interval.intervalSelectEvent($domCalendarTwo)
+
+                    } else {
+                        calendarInit.once.oneSelectEvent($domCalendar)
+
+                        if (resultSettings.settings.count == 2)
+                            calendarInit.once.oneSelectEvent($domCalendarTwo)
+
+                        calendarInit.once.loadSelectedItem()
+                    }
+
+                    // set bars
+                    calendarInit.barItem.setBarByDate()
+                },
+                createFullDomCalendar: function () {
+                    // result DOM
+                    let resultDOM = ``
+                    if (resultSettings.settings.count == 1) {
+                        resultDOM = `<div class="szCalendar__column">
+                                    <div class="szCalendar__row szCalendar__margin-bottom-10 szCalendar__row-buttons szCalendar__flex-padding szCalendar__flex-sb">
+                                        <div data-event="change" data-type="prev">${Utils.getIcon().left}</div>
+                                        <div data-change="name-data"></div>
+                                        <div data-event="change" data-type="next">${Utils.getIcon().right}</div>
+                                    </div>
+                                    <div data-calendar="1"></div>
+                                </div>`
+                    } else {
+                        resultDOM = `<div class="szCalendar__row szCalendar__flex-padding">
+                                            <div class="szCalendar__column">
+                                                <div class="szCalendar__row szCalendar__margin-bottom-10 szCalendar__row-buttons szCalendar__flex-padding szCalendar__flex-sb">
+                                                    <div data-event="change" data-type="prev">${Utils.getIcon().left}</div>
+                                                    <div data-change="prev-data"></div>
+                                                </div>
+                                                <div data-calendar="1"></div>
+                                            </div>
+                                            <div class="szCalendar__column">
+                                                <div class="szCalendar__row szCalendar__margin-bottom-10 szCalendar__row-buttons szCalendar__flex-padding szCalendar__flex-sb">
+                                                    <div data-change="next-data"></div>
+                                                    <div data-event="change" data-type="next">${Utils.getIcon().right}</div>
+                                                </div>
+                                                <div data-calendar="2"></div>
+                                            </div>
+                                        </div>`
+                    }
+
+                    return resultDOM
+                },
+                time: {
+                    onChangeTime: function () {
+                        // max consts
+                        const MAX_HOUR = 24, MAX_MIN = 60
+
+                        // set event
+                        // up/down hour
+                        resultSettings.dom.find('[data-event="hour"]').click(function (e) {
+                            // pr
+                            e.preventDefault()
+
+                            // get attr
+                            let getType = $(this).attr('data-time-type')
+
+                            if (getType == 'up') {
+                                activeTime.hours = activeTime.hours + 1 == 24 ? 0 : activeTime.hours + 1
+                            } else {
+                                activeTime.hours = activeTime.hours - 1 < 0 ? 23 : activeTime.hours - 1
+                            }
+
+                            calendarInit.time.onUpdateInput()
+                        })
+
+                        // up/down hour
+                        resultSettings.dom.find('[data-event="minutes"]').click(function (e) {
+                            // pr
+                            e.preventDefault()
+
+                            // get attr
+                            let getType = $(this).attr('data-time-type')
+
+                            if (getType == 'up') {
+                                activeTime.minutes = activeTime.minutes + 1 == 60 ? 0 : activeTime.minutes + 1
+                            } else {
+                                activeTime.minutes = activeTime.minutes - 1 < 0 ? 59 : activeTime.minutes - 1
+                            }
+
+                            calendarInit.time.onUpdateInput()
+                        })
+
+                        // inout
+                        resultSettings.dom.find('[data-input="hours"]').on('input', function (e) {
+                            // get val
+                            let getVal = parseInt($(this).val())
+
+                            if (getVal > 23) {
+                                activeTime.hours = 23
+                            } else if (getVal < 0 || isNaN(getVal)) {
+                                activeTime.hours = 0
+                            } else {
+                                activeTime.hours = getVal
+                            }
+
+                            $(this).val(activeTime.hours)
+
+                            calendarInit.time.onUpdateInputCall()
+                            updateResultTime()
+                        })
+
+                        // inout
+                        resultSettings.dom.find('[data-input="minutes"]').on('input', function (e) {
+                            // get val
+                            let getVal = parseInt($(this).val())
+
+                            if (getVal > 59) {
+                                activeTime.minutes = 59
+                            } else if (getVal < 0 || isNaN(getVal)) {
+                                activeTime.minutes = 0
+                            } else {
+                                activeTime.minutes = getVal
+                            }
+
+                            $(this).val(activeTime.minutes)
+
+                            calendarInit.time.onUpdateInputCall()
+                            updateResultTime()
+                        })
+                    },
+                    onUpdateInput: function () {
+                        resultSettings.dom.find('[data-input="hours"]').val(calendarInit.time.onFormatInput().hours)
+                        resultSettings.dom.find('[data-input="minutes"]').val(calendarInit.time.onFormatInput().minutes)
+
+                        calendarInit.time.onUpdateInputCall()
+                        updateResultTime()
+                    },
+                    onUpdateInputCall: function() {
+                        if (resultSettings.type == 'INPUT') {
+                            resultSettings.self.val(`${calendarInit.time.onFormatInput().hours}:${calendarInit.time.onFormatInput().minutes}`)
+                        }
+                    },
+                    onFormatInput: function() {
+                        let resultHour, resultMinutes
+
+                        resultHour = activeTime.hours < 10 ? "0" + activeTime.hours : activeTime.hours
+                        resultMinutes = activeTime.minutes < 10 ? "0" + activeTime.minutes : activeTime.minutes
+
+                        return {
+                            hours: resultHour,
+                            minutes: resultMinutes
+                        }
+                    },
+                    setUpTime: function() {
+                        // get val
+                        if (resultSettings.type == 'INPUT') {
+                            let getInput = resultSettings.self.val()
+
+                            console.log(getInput)
+
+                            // check
+                            if(getInput.length > 0 && getInput.split(':').length > 0) {
+                                let resultSplit = getInput.split(':').map(Number)
+
+                                console.log('test ??????? ', resultSplit)
+
+                                // update
+                                activeTime.hours = resultSplit[0]
+                                activeTime.minutes = resultSplit[1]
+
+                                resultSettings.dom.find('[data-input="hours"]').val(calendarInit.time.onFormatInput().hours)
+                                resultSettings.dom.find('[data-input="minutes"]').val(calendarInit.time.onFormatInput().minutes)
+
+                                updateResultTime()
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    createInputs: function () {
+                        // for dom result
+                        let createDom = ``
+
+                        if (resultSettings.settings.elements.inputs) {
+                            // settings
+                            if (resultSettings.settings.type == 1) {
+                                createDom = `<div class="szCalendar__row szCalendar__flex-ac szCalendar__margin-bottom-10 szCalendar__row-inputs szCalendar__flex-padding szCalendar__flex-wrap">
+                                            <div>Диапазон:</div>
+                                            <div><input type="text" data-type="input-interval" data-interval-id="1" ${resultSettings.settings.elements.inputsDisabled ? 'disabled' : ''} /></div>
+                                            <div>&mdash;</div>
+                                            <div><input type="text" data-type="input-interval" data-interval-id="2" ${resultSettings.settings.elements.inputsDisabled ? 'disabled' : ''} /></div>
+                                            ${resultSettings.settings.clearDate && !resultSettings.settings.elements.inputsDisabled ? `<div class="szCalendar__icon-clear" data-event="clear">${Utils.getIcon().clear}</div>` : ``}
+                                        </div>`
+                            } else {
+                                createDom = ``
+                            }
+                        }
+
+                        return {
+                            dom: createDom,
+                            setUpEvent: function () {
+                                if (resultSettings.settings.elements.inputs) {
+                                    resultSettings.dom.find('[data-type="input-interval"]').on('change', function (e) {
+                                        // get type
+                                        let getInput = $(this)
+                                        let getDate = Utils.checkAndFormat(getInput.val().length < 8 ? new Date() : getInput.val())
+
+                                        if (getDate.stringDate != null) {
+                                            // update
+                                            $(this).val(getDate.stringDate)
+
+                                            // get date
+                                            let createDate = new Date(getDate.stampDate)
+
+                                            // start date
+                                            if (getInput.attr('data-interval-id') == "1") {
+
+                                                // get two interval
+                                                let getIntervalTwo = Utils.checkAndFormat(resultSettings.dom.find('[data-type="input-interval"][data-interval-id="2"]').val().length < 8 ? new Date() : resultSettings.dom.find('[data-type="input-interval"][data-interval-id="2"]').val())
+
+                                                if (getIntervalTwo.stampDate < getDate.stampDate) {
+                                                    let createDateIntervalTwo = new Date(getIntervalTwo.stampDate)
+
+                                                    activeItemInterval.date.startDate = `${createDateIntervalTwo.getFullYear()}-${createDateIntervalTwo.getMonth()}-${createDateIntervalTwo.getDate()}`
+                                                    activeItemInterval.date.endDate = `${createDateIntervalTwo.getFullYear()}-${createDateIntervalTwo.getMonth()}-${createDateIntervalTwo.getDate()}`
+
+                                                    // update inputs
+                                                    $(this).val(getIntervalTwo.stringDate)
+                                                    resultSettings.dom.find('[data-type="input-interval"][data-interval-id="2"]').val(getIntervalTwo.stringDate)
+                                                } else {
+                                                    activeItemInterval.date.startDate = `${createDate.getFullYear()}-${createDate.getMonth()}-${createDate.getDate()}`
+                                                }
+                                            } else {
+                                                // get two interval
+                                                let getIntervalOne = Utils.checkAndFormat(resultSettings.dom.find('[data-type="input-interval"][data-interval-id="1"]').val().length < 8 ? new Date() : resultSettings.dom.find('[data-type="input-interval"][data-interval-id="1"]').val())
+
+                                                if (getIntervalOne.stampDate > getDate.stampDate) {
+                                                    let createDateIntervalTwo = new Date(getIntervalOne.stampDate)
+
+                                                    activeItemInterval.date.startDate = `${createDateIntervalTwo.getFullYear()}-${createDateIntervalTwo.getMonth()}-${createDateIntervalTwo.getDate()}`
+                                                    activeItemInterval.date.endDate = `${createDateIntervalTwo.getFullYear()}-${createDateIntervalTwo.getMonth()}-${createDateIntervalTwo.getDate()}`
+
+                                                    // update inputs
+                                                    $(this).val(getIntervalOne.stringDate)
+                                                    resultSettings.dom.find('[data-type="input-interval"][data-interval-id="2"]').val(getIntervalOne.stringDate)
+                                                } else {
+                                                    activeItemInterval.date.endDate = `${createDate.getFullYear()}-${createDate.getMonth()}-${createDate.getDate()}`
+                                                }
+                                            }
+
+                                            calendarInit.updateCalendar()
+                                        }
+
+                                    })
+                                }
+                            }
+                        }
+                    },
+                    stepActive: {
+                        createStepActive: function () {
+                            let $resultDOM = ``
+
+                            if (resultSettings.settings.showStepsInfo.enable) {
+                                $resultDOM = `<div class="szCalendar__step" data-event="step" data-step="0"></div>`
+                            }
+
+                            return $resultDOM
+                        }, setStepActive: function (id) {
+                            // dom
+                            let getDOM = resultSettings.dom.find(`[data-event="step"]`)
+
+                            // add class
+                            getDOM.removeClass('active').removeClass('success')
+
+                            // res
+                            getDOM.html(resultSettings.settings.showStepsInfo.stepsText[id].text)
+                            getDOM.attr('data-step', resultSettings.settings.showStepsInfo.stepsText[id].id)
+
+                            if (id == 1) {
+                                getDOM.addClass('active')
+                            } else if (id == 2) {
+                                getDOM.addClass('success')
+                            }
+                        }
+                    }, onClear: function () {
+                        // if settings on input
+                        if (resultSettings.settings.clearDate) {
+                            resultSettings.dom.find('[data-event="clear"]').click(function () {
+                                // date
+                                activeItemInterval.date.startDate = null
+                                activeItemInterval.date.endDate = null
+
+                                // time
+                                activeItemInterval.date.startTime = null
+                                activeItemInterval.date.endTime = null
+
+                                // calendar
+                                calendarInit.interval.clearIntervalClass()
+                                calendarInit.interval.intervalRangeStyleClear()
+
+                                // clear input
+                                resultSettings.dom.find('[data-type="input-interval"][data-interval-id="1"]').val('')
+                                resultSettings.dom.find('[data-type="input-interval"][data-interval-id="2"]').val('')
+
+                                // set step
+                                if (resultSettings.settings.showStepsInfo.enable) {
+                                    calendarInit.elements.stepActive.setStepActive(0)
+                                }
+                            })
+                        }
+                    }
+                }
+            }
+
+            // update type
+            resultSettings.type = getTypeTag
+            resultSettings.elements.inputDom = this
+            resultSettings.self = _self
+
+            // settings
+            const settings = $.extend({
+                view: 0,    // 0 - calendar, 1 - time
+                type: 0,    // 0 - one, 1 - intervals
+                count: 1,
+                format: "dd/mm/YYYY",
+                showDate: new Date().getTime(),
+                startDate: null,
+                maxDate: false,
+                clearDate: true,
+                closeBySelect: true,
+                elements: {
+                    inputs: true,
+                    inputsDisabled: false,
+                },
+                showStepsInfo: {
+                    enable: false,
+                    stepsText: [
+                        {id: 1, text: 'Задайте интервал от начала даты до конца'},
+                        {id: 2, text: 'Выберите конечные интервал'},
+                        {id: 3, text: 'Интервал был задан'}
+                    ]
                 }
             }, options)
 
-            // months array
-            let monthsArray = ["январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь"]
+            // set global settings
+            resultSettings.settings = settings
 
-            // default to day month & year
-            let defaultYear = settings.startDate.year
-            let defaultMonth = settings.startDate.month - 1
+            if (resultSettings.settings.view == 0) {
+                // start date
+                let getDate = Utils.showCalendarDate()
 
-            // to day params
-            let currentYear = new Date().getFullYear()
-            let currentMonth = new Date().getMonth()
+                // set month
+                let calendarData = {month: getDate.month, year: getDate.year}
 
-            // on change static params
-            let staticMonth = defaultMonth
-            let staticYear = defaultYear
+                // set date
+                resultSettings.date = calendarData
 
-            // selected date
-            let selectedDate = settings.method == ENUM_METHODS.SOLO ? soloCreate : multiCreate
+                // create inputs & calendar
+                let createInputs = calendarInit.elements.createInputs()
+                let createFullCalendar = calendarInit.createFullDomCalendar()
+                let createStepActive = calendarInit.elements.stepActive.createStepActive()
 
-            let $templateSetup = ``, $templateInputs = ``, $templateCalendars = ``
+                let getCoords = null, getClass = null, getStyle = null
 
-            /**
-             * for setup pre dates
-             */
-            if(settings.setup) {
-                $templateSetup = `<div class="szCalendar__multi-setup">
-                                        <a>За все время</a>
-                                        <a calendar-object="setup" calendar-setup-type="toDay">Сегодня</a>
-                                        <a calendar-object="setup" calendar-setup-type="yestDay">Вчера</a>
-                                        <a calendar-object="setup" calendar-setup-type="lastSevenDay">За последние 7 дней</a>
-                                        <a calendar-object="setup" calendar-setup-type="onThisWeek">На этой неделе</a>
-                                        <a calendar-object="setup" calendar-setup-type="onPastWeek">Прошлая неделя</a>
-                                        <a calendar-object="setup" calendar-setup-type="onThisMonth">В этом месяце</a>
-                                        <a calendar-object="setup" calendar-setup-type="onPastMonth">Прошлый месяц</a>
-                                        <a calendar-object="setup" calendar-setup-type="onThisYear">За текущий год</a>
-                                    </div>`
-            }
+                if (getTypeTag == 'INPUT') {
+                    getClass = `szCalendar__absolute szCalendar__hidded`
+                    getStyle = `margin-top: 50px;`
+                }
 
-            /**
-             * for inputs focus
-             */
-            if(settings.input) {
-                $templateInputs = `<div class="szCalendar__multi-form-inputs">
-                                    <div class="szCalendar__multi-form-inputs-title">Диапазон:</div>
-                                    <div><input type="text" calendar-object="multi-start-date" ${settings.editable ? '' : 'disabled'}></div>
-                                    <div>&mdash;</div>
-                                    <div><input type="text" calendar-object="multi-end-date" ${settings.editable ? '' : 'disabled'}></div>
-                                </div>`
-            }
-
-            if(settings.calendarsCount >= VARS.MAX_CALENDAR_COUNT) {
-                $templateCalendars = `<div class="szCalendar__body-item">
-                                        <div class="szCalendar__body-item-menu">
-                                            <div class="szCalendar__body-item-menu-button" calendar-object="prev"><</div>
-                                            <div class="szCalendar__body-item-menu-button" calendar-object="title">${monthsArray[staticMonth]} ${staticYear}</div>
-                                        </div>
-                                        <div>
-                                            <table class="szCalendar__table">
-                                                <thead>
-                                                    <th>пн</th>
-                                                    <th>вт</th>
-                                                    <th>ср</th>
-                                                    <th>чт</th>
-                                                    <th>пт</th>
-                                                    <th>сб</th>
-                                                    <th>вс</th>
-                                                </thead>
-                                                <tbody calendar-object="body-one">
-                                                </tbody>
-                                            </table>
-                                       </div>
+                // result
+                let $domFinal = $(`<div class="szCalendar ${getClass}" style="${getStyle}">
+                                <div class="szCalendar__row">
+                                    <div class="szCalendar__column szCalendar__flex-ac">
+                                        ${createInputs.dom}
+                                        ${createFullCalendar}
+                                        ${createStepActive}
                                     </div>
-                                    <div class="szCalendar__body-item">
-                                        <div class="szCalendar__body-item-menu">
-                                            <div class="szCalendar__body-item-menu-button" calendar-object="title-two">${monthsArray[staticMonth + 1]} ${staticYear}</div>
-                                            <div class="szCalendar__body-item-menu-button" calendar-object="next">></div>
-                                        </div>
-                                        <div>
-                                            <table class="szCalendar__table">
-                                                <thead>
-                                                    <th>пн</th>
-                                                    <th>вт</th>
-                                                    <th>ср</th>
-                                                    <th>чт</th>
-                                                    <th>пт</th>
-                                                    <th>сб</th>
-                                                    <th>вс</th>
-                                                </thead>
-                                                <tbody calendar-object="body-two">
-                                                </tbody>
-                                            </table>
-                                       </div>
-                                    </div>`
-            } else {
-                $templateCalendars = `<div class="szCalendar__body-item">
-                                        <div class="szCalendar__body-item-menu">
-                                            <div class="szCalendar__body-item-menu-button" calendar-object="prev"><</div>
-                                            <div class="szCalendar__body-item-menu-button" calendar-object="title">${monthsArray[staticMonth]} ${staticYear}</div>
-                                            <div class="szCalendar__body-item-menu-button" calendar-object="next">></div>
-                                        </div>
-                                        <div>
-                                            <table class="szCalendar__table">
-                                                <thead>
-                                                    <th>пн</th>
-                                                    <th>вт</th>
-                                                    <th>ср</th>
-                                                    <th>чт</th>
-                                                    <th>пт</th>
-                                                    <th>сб</th>
-                                                    <th>вс</th>
-                                                </thead>
-                                                <tbody calendar-object="body-one">
-                                                </tbody>
-                                            </table>
-                                       </div>
-                                    </div>`
-            }
-
-            // create table
-            let $tableTemplate = $(`
-                <div class="debug">
-                    <div class="szCalendar">
-                        <div class="szCalendar__multi">
-                            ${$templateSetup}
-                            <div class="szCalendar__multi-form">
-                                ${$templateInputs}
-                                <div class="szCalendar__body">
-                                    ${$templateCalendars}
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `)
+                            </div>`)
 
-            // app to html
-            _self.html($tableTemplate)
 
-            /**
-             * events for multi
-             */
-            if(settings.method == ENUM_METHODS.MULTI) {
+                // APP TO JQUERY
+                if (getTypeTag == 'INPUT') {
+                    $(this).parent().prepend($domFinal)
 
-                // first settings
-                selectedDate.firstSettings = true
+                    onLoadInput()
 
-                // on load default params
-                selectedDate.set.setFullDate(settings.params.multi.start.year, settings.params.multi.start.month - 1, settings.params.multi.start.day, 'start')
-                selectedDate.set.setFullDate(settings.params.multi.end.year, settings.params.multi.end.month - 1, settings.params.multi.end.day, 'end')
-
-                if(settings.input) {
-                    // update values inputs by settings
-                    $tableTemplate.find('[calendar-object="multi-start-date"]').val(selectedDate.getSelectedDate().date.start.full)
-                    $tableTemplate.find('[calendar-object="multi-end-date"]').val(selectedDate.getSelectedDate().date.end.full)
-
-                    $tableTemplate.find('[calendar-object="multi-start-date"]').on('change', function () {
-                        updateByType($(this).val(), 'start', 1)
-
-                        // update real data
-                        $(this).val(selectedDate.getSelectedDate().date.start.full)
+                    $(this).on('input', function (e) {
+                        onLoadInput()
                     })
 
-                    $tableTemplate.find('[calendar-object="multi-end-date"]').on('change', function () {
-                        updateByType($(this).val(), 'end', 1)
+                    function onLoadInput() {
+                        if (_self.val().length >= 9) {
+                            // date
+                            let getDate = Utils.checkAndFormat(_self.val())
+                            let defaultDate = Utils.dateSimple(getDate.stampDate)
+                            // active item
+                            activeItem = defaultDate
+                            calendarInit.updateCalendar()
 
-                        // update real data
-                        $(this).val(selectedDate.getSelectedDate().date.end.full)
-                    })
-                }
+                            // set input
+                            _self.val(getDate.stringDate)
 
-                $tableTemplate.find('[calendar-object="setup"]').click(function() {
-                    // get param
-                    let getType = $(this).attr('calendar-setup-type')
-                    let getParamsOfData = selectedDate.setup[getType]()
-
-                    console.log(getParamsOfData)
-
-                    updateByType(getParamsOfData.start, 'start')
-                    updateByType(getParamsOfData.end, 'end')
-
-                    $tableTemplate.find('[calendar-object="multi-start-date"]').val(getParamsOfData.start)
-                    $tableTemplate.find('[calendar-object="multi-end-date"]').val(getParamsOfData.end)
-                })
-
-                function updateByType(value, type, updateType = 0) {
-                    selectedDate.clearSelectorItem(type, $tableTemplate)
-
-                    // parse value
-                    let parseValue = value.split("-")
-
-                    if(updateType != 0) {
-                        let resultParseDate = type == "end" ? "start" : "end"
-                        let parseValueReverse = $tableTemplate.find(`[calendar-object="multi-${resultParseDate}-date"]`).val().split('-')
-
-                        let getCompare = type == "end" ? (parseInt(parseValue[0]) <= parseInt(parseValueReverse[0])) && (parseInt(parseValue[1]) <= parseInt(parseValueReverse[1])) && (parseInt(parseValue[2]) <= parseInt(parseValueReverse[2]))
-                            : (parseInt(parseValue[0]) >= parseInt(parseValueReverse[0])) && (parseInt(parseValue[1]) >= parseInt(parseValueReverse[1])) && (parseInt(parseValue[2]) >= parseInt(parseValueReverse[2]))
-
-                        if (getCompare) {
-                            parseValue = parseValueReverse
                         }
                     }
 
-                    selectedDate.set.setFullDate(parseInt(parseValue[0]), parseInt(parseValue[1]) - 1, parseInt(parseValue[2]), type)
-                    selectedDate.set.setDom($tableTemplate.find(`[data-object="${selectedDate.getSelectedDate()['date'][type]['year']}-${selectedDate.getSelectedDate()['date'][type]['month'] - 1}-${selectedDate.getSelectedDate()['date'][type]['day']}"]`), type)
+                    $(this).on('focus', function () {
+                        if (stateShowed != 1) {
+                            let saveHeight = $(document).innerHeight()
 
-                    updateMultiSelect()
-                }
-            }
+                            // check and show
+                            // parse date
+                            if($(this).val().length > 0) {
+                                console.log("???????")
+                                let getDate = Utils.checkAndFormat($(this).val())
+                                let defaultDate = Utils.dateSimple(getDate.stampDate)
+                                // active item
+                                activeItem = defaultDate
 
-            loadCalendar(defaultMonth)
+                                $(this).val(getDate.stringDate)
 
-            /**
-             * event change calendar prev
-             */
-            $tableTemplate.find('[calendar-object="prev"]').click(function() {
-                let onChangeStaticMonth = staticMonth - 1
-
-                if(onChangeStaticMonth < 0) {
-                    staticMonth = 11
-                    staticYear--
-                } else {
-                    staticMonth = onChangeStaticMonth
-                }
-
-                loadCalendar(staticMonth)
-                onChangeTitle(staticMonth)
-            })
-
-            /**
-             * event change calendar next
-             */
-            $tableTemplate.find('[calendar-object="next"]').click(function() {
-                let onChangeStaticMonth = staticMonth + 1
-
-                if(onChangeStaticMonth == 12) {
-                    staticMonth = 0
-                    staticYear++
-                } else {
-                    staticMonth = onChangeStaticMonth
-                }
-
-                loadCalendar(staticMonth)
-                onChangeTitle(staticMonth)
-            })
-
-            /**
-             * change title's
-             * @param month
-             */
-            function onChangeTitle(month) {
-                let monthForNext = month + 1, yearForNext = staticYear
-
-                if(monthForNext + 1 == 13) {
-                    monthForNext = 0
-                    yearForNext++
-                }
-
-                $tableTemplate.find('[calendar-object="title"]').html(monthsArray[month] + " " + staticYear)
-                $tableTemplate.find('[calendar-object="title-two"]').html(monthsArray[monthForNext] + " " + yearForNext)
-                staticMonth = month
-            }
-
-
-            /**
-             * load calendar
-             * @param getMonth
-             */
-            function loadCalendar(getMonth) {
-                fullLoaderCalendar(getMonth, staticYear)
-
-                if(settings.calendarsCount >= VARS.MAX_CALENDAR_COUNT) {
-                    fullLoaderCalendar(getMonth + 1 == 12 ? 0 : getMonth + 1, getMonth + 1 == 12 ? staticYear + 1 : staticYear, "two")
-                }
-
-                if (settings.method == ENUM_METHODS.MULTI) {
-                    updateMultiSelect()
-                }
-            }
-
-            /**
-             * for multi-selector
-             * @returns {boolean}
-             */
-            function updateMultiSelect() {
-                /**
-                 * for multi
-                 */
-                // check selectors date
-                if(!selectedDate.firstSettings) {
-                    if ((selectedDate.getSelectedDate().dom.start == null) && (selectedDate.getSelectedDate().dom.end == null)) {
-                        selectedDate.clearSelector($tableTemplate)
-                        return false;
-                    }
-                }
-
-                if(selectedDate.getSelectedDate().dom.start != null || selectedDate.firstSettings)
-                    $tableTemplate.find(`[data-object="${selectedDate.getSelectedDate().date.start.year}-${selectedDate.getSelectedDate().date.start.month}-${selectedDate.getSelectedDate().date.start.day}"]`).addClass('szCalendar-selected')
-
-                if(selectedDate.getSelectedDate().dom.end != null || selectedDate.firstSettings)
-                    $tableTemplate.find(`[data-object="${selectedDate.getSelectedDate().date.end.year}-${selectedDate.getSelectedDate().date.end.month}-${selectedDate.getSelectedDate().date.end.day}"]`).addClass('szCalendar-selected')
-
-                selectedDate.firstSettings = true
-
-                selectedDate.set.setStartDom($tableTemplate.find(`[data-object="${selectedDate.getSelectedDate().date.start.year}-${selectedDate.getSelectedDate().date.start.month}-${selectedDate.getSelectedDate().date.start.day}"]`))
-                selectedDate.set.setEndDom($tableTemplate.find(`[data-object="${selectedDate.getSelectedDate().date.end.year}-${selectedDate.getSelectedDate().date.end.month}-${selectedDate.getSelectedDate().date.end.day}"]`))
-
-
-                let getStartDate = {
-                    year: selectedDate.getSelectedDate().date.start.year,
-                    month: selectedDate.getSelectedDate().date.start.month,
-                    day: selectedDate.getSelectedDate().date.start.day
-                }
-
-                let getHoverDate = {
-                    year: selectedDate.getSelectedDate().date.end.year,
-                    month: selectedDate.getSelectedDate().date.end.month,
-                    day: selectedDate.getSelectedDate().date.end.day
-                }
-
-                // get year
-                for(let formYear = getStartDate.year; formYear <= getHoverDate.year; formYear++) {
-                    let startMonth = getStartDate.month
-                    let getEndMonth = getHoverDate.month
-
-                    if(startMonth == 11) {
-                        getEndMonth = 11
-                    }
-
-                    // check form
-                    if(getStartDate.year != formYear) {
-                        startMonth = 0
-                        getEndMonth = getHoverDate.month
-                    }
-
-                    for(let formMonth = startMonth; formMonth <= getEndMonth; formMonth++) {
-                        let startDay = startMonth == 0 ? 0 : getStartDate.day
-                        let endDay = getHoverDate.day
-
-                        if (startMonth < getHoverDate.month) {
-                            if(formMonth != getStartDate.month && formMonth != getHoverDate.month) {
-                                startDay = 0
-                                endDay = 32
-                            } else if (formMonth != getStartDate.month) {
-                                startDay = 0
-                                endDay = getHoverDate.day
-                            } else {
-                                startDay = getStartDate.day
-                                endDay = 32
+                                calendarInit.updateCalendar()
                             }
-                        } else {
-                            if(formMonth == 11) {
-                                endDay = 32
-                            }
-                        }
 
-                        // get day
-                        for(let formDay = startDay; formDay < endDay; formDay++) {
-                            $tableTemplate.find(`[data-object="${formYear}-${formMonth}-${formDay}"]`).addClass('szCalendar-interval-selected')
-                        }
-                    }
-                }
-            }
+                            // show
+                            $domFinal.show()
+                            stateShowed = 1
 
-            /**
-             * main load
-             * @param newMonth
-             * @param newYear
-             * @param dom
-             */
-            function fullLoaderCalendar(newMonth, newYear, dom = "one") {
-                let documentCreate = $(document.createDocumentFragment())
-                // month
-                let month = newMonth
+                            let checkHeightAround = $domFinal.height() + $domFinal.offset().top
 
-                // get date
-                let date = new Date(newYear, month)
-                let toDay = new Date().getDate()
-
-                // for empty values rows
-                for(let i = 0; i < getDay(date); i++) {
-                    if(i == 0) documentCreate.append('<tr>')
-                    documentCreate.append(`<td class="szCalendar-no-active"></td>`)
-                }
-
-                // result calendar
-                while(date.getMonth() == month) {
-                    // save date & create dom
-                    let saveDate = date.getDate()
-                    let $createItem = $(`<td ${saveDate == toDay && month == currentMonth && newYear == currentYear ? 'class="szCalendar-today"' : ""} data-object="${newYear}-${month}-${saveDate}">${saveDate}</td>`)
-
-                    /**
-                     * for solo method date fetch
-                     */
-                    if(settings.method == ENUM_METHODS.SOLO) {
-                        if (selectedDate.getSelectedDate().dom != null) {
-                            if (selectedDate.getSelectedDate().date.year == newYear && selectedDate.getSelectedDate().date.month == month && selectedDate.getSelectedDate().date.day == saveDate) {
-                                $createItem.addClass('szCalendar-selected')
-                                selectedDate.set.setDom($createItem)
-                            }
-                        } else {
-                            if (settings.startDate.day != null) {
-                                if (settings.startDate.day == saveDate) {
-                                    selectedDate.setSelectedDate({
-                                        dom: $createItem,
-                                        date: {
-                                            year: newYear,
-                                            month: staticMonth,
-                                            day: saveDate
-                                        }
-                                    })
-
-                                    // add class
-                                    selectedDate.getSelectedDate().dom.addClass('szCalendar-selected')
-                                }
-                            }
-                        }
-                    } else {
-
-                    }
-
-                    // app to table
-                    documentCreate.append($createItem)
-
-                    if(settings.method == ENUM_METHODS.MULTI) {
-                        $createItem.hover(function() {
-                            if(selectedDate.isSelected()) {
-                                selectedDate.clearRangeDom($tableTemplate)
-
-                                if(selectedDate.getSelectedDate().date.start.year <= newYear) {
-                                    let maxDays = 31
-
-                                    let parseDate = $(this).attr('data-object').split('-')
-
-                                    let getStartDate = { year: selectedDate.getSelectedDate().date.start.year, month: selectedDate.getSelectedDate().date.start.month, day: selectedDate.getSelectedDate().date.start.day }
-                                    let getHoverDate = { year: parseInt(parseDate[0]), month: parseInt(parseDate[1]), day: parseInt(parseDate[2]) }
-
-                                    // get year
-                                    for(let formYear = getStartDate.year; formYear <= getHoverDate.year; formYear++) {
-                                        let startMonth = getStartDate.month
-                                        let getEndMonth = getHoverDate.month
-
-                                        if(startMonth == 11) {
-                                            getEndMonth = 11
-                                        }
-
-                                        // check form
-                                        if(getStartDate.year != formYear) {
-                                            startMonth = 0
-                                            getEndMonth = getHoverDate.month
-                                        }
-
-
-                                        for(let formMonth = startMonth; formMonth <= getEndMonth; formMonth++) {
-                                            let startDay = startMonth == 0 ? 0 : getStartDate.day
-                                            let endDay = getHoverDate.day
-
-                                            if (startMonth < getHoverDate.month) {
-                                                if(formMonth != getStartDate.month && formMonth != getHoverDate.month) {
-                                                    startDay = 0
-                                                    endDay = 32
-                                                } else if (formMonth != getStartDate.month) {
-                                                    startDay = 0
-                                                    endDay = getHoverDate.day
-                                                } else {
-                                                    startDay = getStartDate.day
-                                                    endDay = 32
-                                                }
-                                            } else {
-                                                if(formMonth == 11) {
-                                                    endDay = 32
-                                                }
-                                            }
-
-                                            // get day
-                                            for(let formDay = startDay; formDay < endDay; formDay++) {
-                                                $tableTemplate.find(`[data-object="${formYear}-${formMonth}-${formDay}"]`).addClass('szCalendar-interval-selected')
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        })
-                    }
-
-                    if (settings.editable) {
-                        $createItem.click(function () {
-                            /**
-                             * solo method selector event
-                             */
-                            if (settings.method == ENUM_METHODS.SOLO) {
-                                if (selectedDate.getSelectedDate().dom != null) {
-                                    selectedDate.getSelectedDate().dom.removeClass('szCalendar-selected')
-                                }
-
-                                // update selected date object
-                                selectedDate.setSelectedDate({
-                                    dom: $(this),
-                                    date: {
-                                        year: newYear,
-                                        month: month,
-                                        day: saveDate
-                                    }
+                            if(saveHeight < checkHeightAround) {
+                                $domFinal.css({
+                                    marginTop: `-${$domFinal.height() + 40}px`
                                 })
-
-                                // add class
-                                selectedDate.getSelectedDate().dom.addClass('szCalendar-selected')
-
-                                // TODO: DEBUG!
-                                $tableTemplate.find('[debug-object="selected-date"]').html(new Date(selectedDate.getSelectedDate().date.timestamp).getFullYear())
-                                $tableTemplate.find('[debug-object="selected-date-timestamp"]').html(selectedDate.getSelectedDate().date.timestamp)
                             } else {
-                                if (!selectedDate.isSelected()) {
-                                    selectedDate.clearSelector($tableTemplate)
-                                }
-
-                                /**
-                                 * multi method selector event
-                                 */
-                                if (selectedDate.isSelected()) {
-                                    selectedDate.setStateSelected(false)
-
-                                    if ((newYear <= selectedDate.getSelectedDate().date.start.year) && (month <= selectedDate.getSelectedDate().date.start.month) && (saveDate <= selectedDate.getSelectedDate().date.start.day)) {
-                                        selectedDate.set.setEndDom(selectedDate.getSelectedDate().dom.start)
-                                        selectedDate.set.setFullDate(selectedDate.getSelectedDate().date.start.year, selectedDate.getSelectedDate().date.start.month, selectedDate.getSelectedDate().date.start.day, 'end')
-                                    } else {
-                                        selectedDate.set.setEndDom($(this))
-                                        selectedDate.set.setFullDate(newYear, month, saveDate, 'end')
-                                    }
-                                    selectedDate.getSelectedDate().dom.end.addClass('szCalendar-selected')
-
-                                    if(settings.input) {
-                                        // update date in input
-                                        $tableTemplate.find('[calendar-object="multi-end-date"]').val(selectedDate.getSelectedDate().date.end.full)
-                                        $tableTemplate.find('[calendar-object="multi-end-date"]').focus()
-                                    }
-
-                                } else {
-                                    if(settings.input) {
-                                        // set active state
-                                        $tableTemplate.find('[calendar-object="multi-start-date"]').focus()
-                                    }
-
-                                    selectedDate.setStateSelected(true)
-
-                                    selectedDate.set.setStartDom($(this))
-                                    selectedDate.set.setFullDate(newYear, month, saveDate, 'start')
-
-                                    selectedDate.getSelectedDate().dom.start.addClass('szCalendar-selected')
-
-                                    if(settings.input) {
-                                        // update date in input
-                                        $tableTemplate.find('[calendar-object="multi-start-date"]').val(selectedDate.getSelectedDate().date.start.full)
-                                    }
-                                }
+                                $domFinal.css({
+                                    marginTop: `50px`
+                                })
                             }
-                        })
+                        }
+                    })
+
+                    _self.keydown(function (e) {
+                        if (e.keyCode == 9) {
+                            $domFinal.hide()
+                            stateShowed = 0
+                        }
+                    })
+
+                    $(document).mousedown(function (e) {
+                        var div = $domFinal, input = _self
+                        if ((!div.is(e.target)
+                            && div.has(e.target).length === 0) && !input.is(e.target) && input.has(e.target).length == 0) { // и не по его дочерним элементам
+                            $domFinal.hide()
+                            stateShowed = 0
+                        }
+                    })
+                } else {
+                    $(this).html($domFinal)
+                }
+
+                // update global settings
+                resultSettings.dom = $domFinal
+
+                // init calendars
+                calendarInit.setUp()
+                createInputs.setUpEvent()
+                calendarInit.elements.onClear()
+            } else {
+                // time
+                let getClass = `szCalendar__absolute szCalendar__hidded`
+
+                let getStyle = `margin-top: 50px; width: 200px;`
+
+                let $domFinal = $(`<div class="szCalendar ${getClass}" style="${getStyle}">
+                                <div class="szCalendar__row">
+                                    <div class="szCalendar__column szCalendar__flex-ac">
+                                        <div class="szCalendar__row szCalendar__flex szCalendar__flex-sb szCalendar__flex-ac szCalendar__time">
+                                            <div class="szCalendar__time-button" data-event="hour" data-time-type="up">${Utils.getIcon().time.up}</div>
+                                            <div></div>
+                                            <div class="szCalendar__time-button" data-event="minutes" data-time-type="up">${Utils.getIcon().time.up}</div>
+                                        </div>
+                                        <div class="szCalendar__row szCalendar__flex szCalendar__flex-sb szCalendar__flex-ac szCalendar__time">
+                                            <div><input type="number" data-input="hours" maxlength="2"></div>
+                                            <div class="szCalendar__time-double">${Utils.getIcon().time.double}</div>
+                                            <div><input type="number" data-input="minutes" maxlength="2"></div>
+                                        </div>
+                                        <div class="szCalendar__row szCalendar__flex szCalendar__flex-sb szCalendar__flex-ac szCalendar__time">
+                                            <div class="szCalendar__time-button" data-event="hour" data-time-type="down">${Utils.getIcon().time.down}</div>
+                                            <div></div>
+                                            <div class="szCalendar__time-button" data-event="minutes" data-time-type="down">${Utils.getIcon().time.down}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>`)
+
+                if (getTypeTag == 'INPUT') {
+                    $(this).parent().prepend($domFinal)
+
+                    resultSettings.dom = $domFinal
+
+                    calendarInit.time.onChangeTime()
+                    calendarInit.time.onUpdateInput()
+
+                    onLoadInput()
+
+                    $(this).on('input', function (e) {
+                        onLoadInput()
+                    })
+
+                    function onLoadInput() {
+                        if (_self.val().length >= 5) {
+                            // get input
+                            let getInput = _self.val().split(':').map(Number)
+
+                            if(getInput.length > 0) {
+                                if(getInput[0] > 23) {
+                                    activeTime.hours = 0
+                                } else {
+                                    activeTime.hours = getInput[0]
+                                }
+
+                                if(getInput[1] > 59) {
+                                    activeTime.minutes = 0
+                                } else {
+                                    activeTime.minutes = getInput[1]
+                                }
+
+                            } else {
+                                activeTime.hours = 0
+                                activeTime.minutes = 0
+                            }
+
+                            // set input
+                            _self.val(`${calendarInit.time.onFormatInput().hours}:${calendarInit.time.onFormatInput().minutes}`)
+                            calendarInit.time.setUpTime()
+
+                        }
                     }
 
-                    if(getDay(date) % 7 == 6) {
-                        documentCreate.append('</tr><tr>')
-                    }
+                    $(this).on('focus', function () {
+                        if (stateShowed != 1) {
+                            // set up time
+                            calendarInit.time.setUpTime()
 
-                    // update date
-                    date.setDate(date.getDate() + 1);
+                            let saveHeight = $(document).innerHeight()
+
+                            // show
+                            $domFinal.show()
+                            stateShowed = 1
+
+                            let checkHeightAround = $domFinal.height() + $domFinal.offset().top
+
+                            if(saveHeight < checkHeightAround) {
+                                $domFinal.css({
+                                    marginTop: `-${$domFinal.height() + 40}px`
+                                })
+                            } else {
+                                $domFinal.css({
+                                    marginTop: `50px`
+                                })
+                            }
+                        }
+                    })
+
+                    _self.keydown(function (e) {
+                        if (e.keyCode == 9) {
+                            $domFinal.hide()
+                            stateShowed = 0
+                        }
+                    })
+
+                    $(document).mousedown(function (e) {
+                        var div = $domFinal, input = _self
+                        if ((!div.is(e.target)
+                            && div.has(e.target).length === 0) && !input.is(e.target) && input.has(e.target).length == 0) { // и не по его дочерним элементам
+                            $domFinal.hide()
+                            stateShowed = 0
+                        }
+                    })
                 }
-
-                // end of calendar DOM
-                if(getDay(date) != 0) {
-                    for(let i = getDay(date); i < 7; i++) {
-                        if(i == 0) documentCreate.append('<tr>')
-                        documentCreate.append(`<td class="szCalendar-no-active"></td>`)
-                    }
-                }
-
-                function getDay(dd) {
-                    let day = dd.getDay();
-                    if (day == 0) day = 7;
-                    return day - 1;
-                }
-
-                function daysInMonth(month, year) {
-                    return new Date(year, month, 0).getDate();
-                }
-
-                _self.find(`[calendar-object="body-${dom}"]`).html(documentCreate)
             }
-        }, getFullDate: function() {
-            return multiCreate.getSelectedDate().date
+
+        },
+        resultDate: function() {
+            return this.data('getData')
         }
     }
 

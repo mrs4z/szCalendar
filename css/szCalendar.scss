@@ -1,207 +1,276 @@
-$colorPred: #ff6738;
-$colorPredHover: #ff3400;
-$colorPredRangeSelected: #ffcead;
-$hoverBackground: #E9E9E9;
-$hoverBackgroundDark: #dedede;
-$borderCalendarColor: #f8f8f8;
-
-
-$colorLink: #ff815c;
-$textGray: #7a7a7a;
-$toDay: #FF4C4C;
-
-$noActiveDays: #BDBDBD;
-
 .szCalendar {
-  width: 100%;
+  font-family: Roboto, sans-serif;
   border-radius: 5px;
-  border: 1px solid $borderCalendarColor;
-  -webkit-box-shadow: 0px 0px 17px -2px rgba(0,0,0,0.23);
-  -moz-box-shadow: 0px 0px 17px -2px rgba(0,0,0,0.23);
-  box-shadow: 0px 0px 17px -2px rgba(0,0,0,0.23);
+  border: 1px solid #E6E6E6;
+  box-sizing: border-box;
+  padding: 10px;
+  font-size: 10pt;
 
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  &__time {
+    margin-bottom: 10px;
 
-  &__multi {
-    display: flex;
-    flex-direction: row;
+    &:last-child {
+      margin-bottom: 0px;
+    }
 
-    &-setup {
-      width: 180px;
-      border-right: 1px solid $hoverBackground;
-      padding: 20px;
+    &-double {
+      font-size: 20pt;
+      font-weight: bold;
+    }
 
-      display: flex;
-      flex-direction: column;
+    &-button {
+      flex: 1 1 auto;
+      max-width: 40px;
+      padding: 15px;
+      background: #E6E6E6;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      font-size: 14pt;
+      color: #8D8D8D;
 
-      a {
-        color: $colorLink;
-        text-decoration: none;
-        margin-bottom: 15px;
-        font-size: 11pt;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
 
-        &:last-child {
-          margin-bottom: 0px !important;
-        }
+      transition: all .1s ease-in-out;
 
-        &:hover {
-          text-decoration: underline;
-        }
+      &:active {
+        background: #acacac !important;
+      }
+
+      &:hover {
+        background: #D4D4D4;
+        color: #000;
       }
     }
 
-    &-form-inputs {
+    input {
+      flex: 1 1 auto;
+      max-width: 40px;
       padding: 15px;
-      border-bottom: 1px solid $hoverBackground;
+      background: #E6E6E6;
+      border-radius: 5px;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      -webkit-appearance: none;
+      border: 0;
+      font-size: 14pt;
+    }
 
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-right: -10px;
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+      /* display: none; <- Crashes Chrome on hover */
+      -webkit-appearance: none;
+      margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+    }
+  }
 
-      div {
-        margin-right: 10px;
+  &__absolute {
+    position: absolute;
+    z-index: 9999999;
+    background: #fff;
+    -webkit-box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.1);
+    -moz-box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.1);
+    box-shadow: 0px 0px 15px 1px rgba(0,0,0,0.1);
+  }
+
+  &__hidded {
+    display: none;
+  }
+
+  &__icon {
+    &-clear {
+      padding: 7px;
+      border-radius: 5px;
+      background: #E6E6E6;
+      font-weight: bold;
+      cursor: pointer;
+
+      &:hover {
+        background: #d2d2d2;
       }
+    }
+  }
 
-      &-title {
-        color: $textGray;
-        font-size: 11pt;
-      }
+  &__step {
+    width: 100%;
+    height: 25px;
+    background: #E6E6E6;
+    color: #a0a0a0;
+    margin-top: 5px;
+    border-radius: 5px;
+    line-height: 25px;
+    text-align: center;
+
+    &.active {
+      background: #ffdecd;
+    }
+
+    &.success {
+      background: #dbfdc5;
+    }
+  }
+
+  &__margin-bottom-10 {
+    margin-bottom: 10px !important;
+  }
+
+  &__row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+
+    &-inputs {
+      color: #8D8D8D;
 
       input {
-        max-width: 100px;
-        border: 1px solid $hoverBackgroundDark;
-        border-radius: 5px;
+        max-width: 150px;
+        -webkit-appearance: none;
+        border: 1px solid #E6E6E6;
         font-size: 12pt;
+        border-radius: 4px;
         padding: 5px;
 
         &:disabled {
-          cursor: not-allowed;
           opacity: 0.7;
-          background: $hoverBackground;
+          cursor: not-allowed;
         }
       }
     }
 
+    &-buttons {
+      justify-content: space-between;
+      font-size: 10pt;
+
+      & > div {
+        flex: 1 1 auto;
+        padding: 7px;
+        background: #E6E6E6;
+        border-radius: 5px;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+
+        &:hover {
+          background: #D4D4D4;
+        }
+      }
+
+    }
   }
 
-
-
-  &__body {
+  &__column {
+    width: 100%;
     display: flex;
-    flex-direction: row;
-    padding: 10px;
-    margin: -10px;
+    flex-direction: column;
+  }
 
-    &-item {
-      margin: 10px;
-      display: flex;
-      flex-direction: column;
+  table {
+    box-sizing: border-box;
+    border-collapse: collapse;
+    border: 0px !important;
 
-      &-menu {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        margin: -10px;
-        padding-bottom: 15px;
+    thead {
+      th {
+        padding: 10px;
+      }
+    }
+    tbody {
+      tr {
+        border: 0px !important;
 
-        &-button {
-          flex-grow: 1;
+        td {
+          padding: 10px;
           text-align: center;
-          padding: 5px;
-          background: $hoverBackground;
-          border-radius: 5px;
-          font-weight: bold;
-          margin: 10px;
           cursor: pointer;
-          font-size: 10pt;
+          border: 0px !important;
 
+          &.around {
+            color: #8D8D8D !important;
+
+            &.selected {
+              background: #ffdecd;
+            }
+
+            &.active {
+              background: #fc9974 !important;
+              color: #fff !important;
+            }
+
+            &:hover {
+              background: #e9e9e9;
+
+              &.dateDisabled {
+                background: #FFFFFF !important;
+                color: #D5D5D5 !important;
+                cursor: not-allowed;
+              }
+            }
+          }
+
+          // hover effect
           &:hover {
-            background: $hoverBackgroundDark;
+            background: #FEEAD3;
+
+            &.dateDisabled {
+              background: #FFFFFF !important;
+              color: #D5D5D5 !important;
+              cursor: not-allowed;
+            }
+          }
+
+          &.cursor-not {
+            cursor: not-allowed !important;
+          }
+
+          &.toDay {
+            color: #f05a28;
+          }
+
+          &.dateDisabled {
+            color: #D5D5D5 !important;
+          }
+
+          // active element calendar
+          &.active {
+            background: #f05a28 !important;
+            color: #fff;
+          }
+
+          &.selected {
+            background: #FEEAD3;
           }
         }
       }
     }
   }
 
-  &__header {
-    width: 100%;
-    height: 50px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-
-    &-title {
-      margin-left: 10px;
-      margin-right: 10px;
-      width: 100%;
-      text-align: center;
-      padding: 10px;
-      background: $hoverBackground;
-      font-weight: bold;
+  &__flex {
+    &-ac {
+      align-items: center;
     }
 
+    &-sb {
+      justify-content: space-between;
+    }
 
-    &-mini {
-      padding: 10px;
-      background: $hoverBackground;
-      cursor: pointer;
+    &-wrap {
+      flex-wrap: wrap;
+    }
 
-      &:hover {
-        background: $hoverBackgroundDark;
+    &-padding {
+      box-sizing: border-box !important;
+      margin: 0 0px;
+
+      & > div {
+        margin: 0 5px;
       }
     }
-  }
-}
-
-.debug {
-  display: inline-flex;
-}
-
-table.szCalendar__table {
-  width: 100%;
-  box-sizing: border-box;
-  border-collapse: collapse;
-
-  th {
-    font-size: 10pt;
-  }
-
-  td {
-    padding: 10px;
-    cursor: pointer;
-    text-align: center;
-    font-size: 10pt;
-
-    &:hover {
-      background: $hoverBackground;
-    }
-  }
-}
-
-.szCalendar-no-active {
-  color: $noActiveDays;
-}
-
-.szCalendar-today {
-  color: $toDay;
-  border-bottom: 1px solid $toDay;
-}
-
-.szCalendar-interval-selected {
-  background: $colorPredRangeSelected;
-}
-
-.szCalendar-selected {
-  background: $colorPred;
-  color: #fff;
-
-  &:hover {
-    background: $colorPredHover !important;
   }
 }
